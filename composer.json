@@ -1,0 +1,25 @@
+{
+  "name": "lonnieezell/myth-work",
+  "type": "project",
+  "description": "A bare-bones PHP framework with an old-school feel and modern sensibilities.",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Lonnie Ezell",
+      "email": "lonnieje@gmail.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=7.3",
+    "kint-php/kint": "^3.3"
+  },
+  "require-dev": {
+    "codeception/codeception": "^4.1"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Myth\\": "myth/"
+    }
+  }
+}
