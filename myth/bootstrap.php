@@ -16,6 +16,9 @@ define('APPPATH', realpath(ROOTPATH.'app') .'/');
 // Default timezone of server
 date_default_timezone_set('UTC');
 
+// Load .env file
+(new \Myth\DotEnv(ROOTPATH .'/.env'))->load();
+
 //---------------------------------------------------------
 // LOAD HELPERS
 //---------------------------------------------------------
