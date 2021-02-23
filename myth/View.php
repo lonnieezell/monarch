@@ -7,7 +7,7 @@
  *
  * @package Myth
  */
-class View extends StaticClass
+class View
 {
 	/**
 	 * The name of the layout to use
@@ -28,6 +28,17 @@ class View extends StaticClass
 	 * @var string
 	 */
 	protected $currentSlot;
+
+    static public $instance;
+
+    public static function factory()
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+
+        return self::$instance;
+    }
 
 	/**
 	 * Includes the contents of a single view

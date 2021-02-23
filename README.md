@@ -33,9 +33,7 @@ and then format it into a JSON response before returning it to the client. I'm s
 
 As for an custom PHP code you need, it's all built on [Composer](https://getcomposer.org), so autoloading
 works out of the box. Edit `composer.json` to add a custom namespace or pull in any third-party components
-you might need. 
-
-A super simple database solution will be provided that will be mostly a convenience wrapper around PHPs driver.
+you might need. .
 
 ## Configuration
 
@@ -62,4 +60,10 @@ name of the key to locate, and the second being a default value that will be use
 'emailDriver' => env('EMAIL_DRIVER', 'smtp'), 
 ```
 
+## Database
+
+Database access is provided via [ReadbeanPHP ORM](https://redbeanphp.com/index.php); To make setup simple, you 
+can use the `db_connect()` method which takes a single argument: the name of the group to connect to. Groups
+are defined in `config/database.php`. See that file for more information. Once you've connected, you can 
+access Redbean per the docs.
 

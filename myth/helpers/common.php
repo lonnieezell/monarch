@@ -35,6 +35,17 @@ function config(string $key)
 }
 
 /**
+ * Provides a thin wrapper around the RedBean database library.
+ *
+ * @param string $group
+ *
+ * @return mixed
+ */
+function db_connect(string $group='default') {
+    return \Myth\Database::factory()->connect($group);
+}
+
+/**
  * Searches an array through dot syntax. Supports
  * wildcard searches, like foo.*.bar
  *
@@ -120,7 +131,11 @@ function _array_search_dot(array $indexes, array $array)
  */
 function env(string $key, ?string $default)
 {
-    return getenv($key) ?? $default;
+    $value = getenv($key);
+
+    return $value !== false
+        ? $value
+        : $default;
 }
 
 /**

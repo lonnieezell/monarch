@@ -4,3 +4,4 @@ phpunit
 *.cache
 .DS_Store
 .idea/
+.env

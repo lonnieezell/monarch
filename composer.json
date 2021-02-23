@@ -12,9 +12,10 @@
   ],
   "require": {
     "php": ">=7.3",
-    "kint-php/kint": "^3.3"
+    "gabordemooij/redbean": "dev-master"
   },
   "require-dev": {
+    "kint-php/kint": "^3.3",
     "codeception/codeception": "^4.1"
   },
   "autoload-dev": {
