@@ -37,4 +37,29 @@ you might need.
 
 A super simple database solution will be provided that will be mostly a convenience wrapper around PHPs driver.
 
+## Configuration
+
+Config files are simple arrays that contain the data you need to access. The values can always be accessed through 
+the `config()` function that is always available. It takes a single parameters: a string that starts with the 
+file name, then each key in an array, separated by periods. 
+
+```
+// Given the following array in config/email.php
+'from' = [
+    'name' => 'Foo Bar',
+    'email' => 'foo@example.com
+];
+
+// Grab the name by: 
+$name = config('email.name');
+```
+
+Any values stored within a `.env` file at the project root will be loaded into the environment during script startup.
+This allows you to use the `env()` function to retrieve the value from the environment. The first argument is the
+name of the key to locate, and the second being a default value that will be used when no value is found.
+
+```
+'emailDriver' => env('EMAIL_DRIVER', 'smtp'), 
+```
+
 
