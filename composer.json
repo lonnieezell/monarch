@@ -1,26 +1,33 @@
 {
-  "name": "lonnieezell/myth-work",
-  "type": "project",
-  "description": "A bare-bones PHP framework with an old-school feel and modern sensibilities.",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Lonnie Ezell",
-      "email": "lonnieje@gmail.com",
-      "role": "Developer"
+    "name": "lonnieezell/myth-work",
+    "type": "project",
+    "description": "A bare-bones PHP framework with an old-school feel and modern sensibilities.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Lonnie Ezell",
+            "email": "lonnieje@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "gabordemooij/redbean": "dev-master"
+    },
+    "require-dev": {
+        "kint-php/kint": "^3.3",
+        "pestphp/pest": "^2.34",
+        "pestphp/pest-plugin-drift": "^2.5"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Myth\\": "myth/",
+            "Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     }
-  ],
-  "require": {
-    "php": ">=7.3",
-    "gabordemooij/redbean": "dev-master"
-  },
-  "require-dev": {
-    "kint-php/kint": "^3.3",
-    "codeception/codeception": "^4.1"
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Myth\\": "myth/"
-    }
-  }
 }

@@ -48,9 +48,9 @@ class View
 	 * @param string     $view
 	 * @param array|null $data
 	 */
-	public function display(string $view, ?array $data): string
+	public function display(string $file, ?array $data): string
 	{
-		$path = APPPATH."views/{$view}.php";
+		$path = ROOTPATH."routes/{$file}.php";
 
 		if (! file_exists($path)) {
 			throw new \RuntimeException("View not found: {$path}");

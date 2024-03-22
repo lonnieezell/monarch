@@ -1,7 +1,14 @@
 vendor/
+
 phpunit*.xml
 phpunit
+.phpunit.cache/
+.phpunit.result.cache
+
 *.cache
 .DS_Store
+
 .idea/
+.vscode/
+
 .env

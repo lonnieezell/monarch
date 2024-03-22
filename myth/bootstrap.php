@@ -1,17 +1,15 @@
 <?php
 
 // Start Time
-define('START_TIME', time());
-
-// Start Memory
-define('START_MEMORY', memory_get_usage());
+define('START_TIME', microtime(true));
 
 // Hook up Composer
 include '../vendor/autoload.php';
 
 // constants
-define('ROOTPATH', realpath('..') .'/');
+define('ROOTPATH', realpath('.') .'/');
 define('APPPATH', realpath(ROOTPATH.'app') .'/');
+define('TESTPATH', realpath(ROOTPATH.'tests') .'/');
 
 // Default timezone of server
 date_default_timezone_set('UTC');
@@ -23,17 +21,3 @@ date_default_timezone_set('UTC');
 // LOAD HELPERS
 //---------------------------------------------------------
 include ROOTPATH .'myth/helpers/common.php';
-
-//---------------------------------------------------------
-// RUN CONTROLLER
-//---------------------------------------------------------
-$controllerName = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-$controllerName = empty($controllerName) ? 'index.php' : $controllerName;
-$controllerPath = ROOTPATH.'app/controllers/'.$controllerName;
-
-if (file_exists($controllerPath)) {
-	include $controllerPath;
-}
-
-
-
