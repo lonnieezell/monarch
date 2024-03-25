@@ -55,6 +55,8 @@ class Router
     public function getFilesForRequest(Request $request): array
     {
         $path = ltrim($request->path ?: 'index', '/');
+        $path = strtolower($path);
+        $path = str_replace(['/', '.'], DIRECTORY_SEPARATOR, $path);
         $routeFile = $this->basePath . $path . '.php';
         $controlFile = $this->basePath . $path . '.control.php';
 
