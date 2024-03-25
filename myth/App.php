@@ -5,18 +5,21 @@ namespace Myth;
 use Myth\HTTP\Request;
 use Myth\Routes\Router;
 use Myth\View\Renderer;
+use RuntimeException;
+use Throwable;
 
 class App
 {
     private static App $instance;
-    private Request $request;
 
+    public readonly Request $request;
     public readonly float $startTime;
 
-    public static function instance(): App
+    public static function createFromGlobals(): App
     {
         if (!isset(self::$instance)) {
             self::$instance = new self();
+            self::$instance->setRequest(Request::createFromGlobals());
         }
 
         return self::$instance;
@@ -26,57 +29,93 @@ class App
     {
         $this->startTime =  microtime(true);
 
-        // constants
-        define('ROOTPATH', realpath('..') .'/');
-        define('APPPATH', realpath(ROOTPATH.'app') .'/');
-        define('TESTPATH', realpath(ROOTPATH.'tests') .'/');
-
         // Default timezone of server
         date_default_timezone_set('UTC');
     }
 
-    private function boot()
-    {
-        // Load .env file
-        (new \Myth\DotEnv(ROOTPATH .'/.env'))->load();
-
-        include ROOTPATH .'myth/helpers/common.php';
-    }
-
+    /**
+     * Runs the application and returns the output.
+     */
     public function run()
     {
-        $this->boot();
+        try {
+            // Load .env file
+            (new \Myth\DotEnv(ROOTPATH .'/.env'))->load();
 
-        ob_start();
+            include ROOTPATH .'myth/helpers/common.php';
 
-        $this->request = Request::createFromGlobals();
+            ob_start();
 
-        $router = new Router();
-        $router->setBasePath(ROOTPATH .'routes');
-        [$routeFile, $controlFile] = $router->getFilesForRequest($this->request);
+            $router = new Router();
+            $router->setBasePath(ROOTPATH .'routes');
+            [$routeFile, $controlFile] = $router->getFilesForRequest($this->request);
 
-        // Defaults
-        $content = 'index';
-        $data = [];
+            // Defaults
+            $content = 'index';
+            $data = [];
 
-        $control = $controlFile !== null ? include $controlFile : null;
+            $control = $controlFile !== null ? include $controlFile : null;
 
-        if ($control && method_exists($control, strtolower($this->request->method))) {
-            $output = $control->{strtolower($this->request->method)}();
+            if ($control && method_exists($control, strtolower($this->request->method))) {
+                $output = $control->{strtolower($this->request->method)}();
 
-            if (is_array($output)) {
-                $content = $output['content'] ?? $content;
-                $data = $output['data'] ?? $output;
-            } elseif (is_string($output)) {
-                $content = $output;
+                if (is_array($output)) {
+                    $content = $output['content'] ?? $content;
+                    $data = $output['data'] ?? $output;
+                } elseif (is_string($output)) {
+                    $content = $output;
+                }
             }
+
+            $renderer = Renderer::createWithRequest($this->request);
+            $output = $renderer
+                ->withRouteParams(content: $content, data: $data)
+                ->render($routeFile);
+
+            return $output;
+        } catch (Throwable $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    /**
+     * Sets the Request instance for the app.
+     * This method is primarily used internally for
+     * the `createFromGlobals` method, but is also
+     * useful for testing.
+     *
+     * Example:
+     *  $request = new Request();
+     *  $app = App::instance();
+     *  $app->setRequest($request);
+     */
+    public function setRequest(Request $request): self
+    {
+        $this->request = $request;
+
+        return $this;
+    }
+
+    private function handleException(Throwable $e)
+    {
+        if (ENVIRONMENT === 'testing') {
+            throw $e;
         }
 
-        $renderer = Renderer::createWithRequest($this->request);
-        $output = $renderer
-            ->withRouteParams(content: $content, data: $data)
-            ->render($routeFile);
+        $type = get_class($e);
+        $message = $e->getMessage();
+        $code = $e->getCode();
+        $file = $e->getFile();
+        $line = $e->getLine();
+        $trace = $e->getTraceAsString();
 
-        return $output;
+        // TODO - Log the error
+        // TODO - Used per-environment error pages
+        // TODO - Hande HTTP status codes
+        ob_start();
+        include ROOTPATH .'routes/+error.php';
+        echo ob_get_clean() ?? '';
+
+        exit(1);
     }
 }

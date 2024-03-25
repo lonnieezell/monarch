@@ -5,4 +5,10 @@ use Myth\App;
 // Hook up Composer
 include_once '../vendor/autoload.php';
 
-echo App::instance()->run();
+// constants
+define('ENVIRONMENT', getenv('ENVIRONMENT') ?: 'development');
+define('ROOTPATH', realpath('..') .'/');
+define('APPPATH', realpath(ROOTPATH.'app') .'/');
+define('TESTPATH', realpath(ROOTPATH.'tests') .'/');
+
+echo App::createFromGlobals()->run();
