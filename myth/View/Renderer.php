@@ -4,19 +4,15 @@ declare(strict_types=1);
 
 namespace Myth\View;
 
+use Myth\Config;
 use Myth\HTTP\Request;
 use Myth\View\Renderers\HTMLRenderer;
 use RuntimeException;
 
 class Renderer
 {
-    private string $content;
-    private array $data;
-    private array $extmap = [
-        '.api.php' => '',
-        '.php' => HTMLRenderer::class,
-        '.md' => '',
-    ];
+    private ?string $content = null;
+    private array $data = [];
     private Request $request;
 
     /**
@@ -35,14 +31,17 @@ class Renderer
      * It will determine the renderer to use for the route
      * based on the file extension and the classes in the $extmap property.
      *
+     * NOTE: The route file is the full path to the file.
+     *
      * @throws RuntimeException
      */
     public function render(string $routeFile): ?string
     {
         $rendererName = null;
-        foreach ($this->extmap as $ext => $method) {
+        $availableRenderers = Config::factory()->get('routes.renderers');
+        foreach ($availableRenderers as $ext => $handler) {
             if (substr($routeFile, -strlen($ext)) === $ext) {
-                $rendererName = $method;
+                $rendererName = $handler;
                 break;
             }
         }

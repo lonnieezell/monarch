@@ -1,4 +1,6 @@
-<?php namespace Myth;
+<?php
+
+namespace Myth;
 
 /**
  * Class Config
@@ -16,7 +18,7 @@ class Config
      */
     protected $files = [];
 
-    static public $instance;
+    public static $instance;
 
     public static function factory()
     {
@@ -45,7 +47,7 @@ class Config
         $file = array_shift($keys);
 
         if (! isset($this->files[$file])) {
-            $path = APPPATH ."config/{$file}.php";
+            $path = ROOTPATH ."config/{$file}.php";
 
             if (! file_exists($path)) {
                 throw new \RuntimeException('Config file not found: '. $path);

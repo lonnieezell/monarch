@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Myth\Routes;
 
+use Myth\Config;
 use Myth\HTTP\Request;
 
 /**
@@ -57,11 +58,17 @@ class Router
         $path = ltrim($request->path ?: 'index', '/');
         $path = strtolower($path);
         $path = str_replace(['/', '.'], DIRECTORY_SEPARATOR, $path);
-        $routeFile = $this->basePath . $path . '.php';
+        $routeFile = null;
+        $searchFile = $this->basePath . $path;
         $controlFile = $this->basePath . $path . '.control.php';
 
-        if (! file_exists($routeFile)) {
-            $routeFile = null;
+        $availableRouteTypes = Config::factory()->get('routes.renderers');
+
+        foreach ($availableRouteTypes as $ext => $handler) {
+            if (file_exists($searchFile . $ext)) {
+                $routeFile = $searchFile . $ext;
+                break;
+            }
         }
 
         if (! file_exists($controlFile)) {

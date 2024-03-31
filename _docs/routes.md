@@ -50,7 +50,7 @@ Route types are defined within the `app/config/routes.php` file.
 Route types are determine based on the route files' extension. The default route files are:
 
 -   `.php` for web pages
--   `_{name}.php` for fragments
+-   `-{name}.php` for fragments
 -   `.api.php` for Rest API endpoints
 -   `.md` for Markdown files.
 

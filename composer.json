@@ -1,7 +1,7 @@
 {
     "name": "lonnieezell/myth-work",
     "type": "project",
-    "description": "A bare-bones PHP framework with an old-school feel and modern sensibilities.",
+    "description": "An opinionated PHP framework with an old-school feel and modern sensibilities.",
     "license": "MIT",
     "authors": [
         {
@@ -12,7 +12,8 @@
     ],
     "require": {
         "php": ">=8.1",
-        "gabordemooij/redbean": "dev-master"
+        "gabordemooij/redbean": "dev-master",
+        "league/commonmark": "^2.4"
     },
     "require-dev": {
         "kint-php/kint": "^3.3",

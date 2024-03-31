@@ -11,11 +11,24 @@
 |
 */
 
+use Myth\App;
 use Tests\TestCase;
 
 uses(TestCase::class)
     ->beforeAll(function () {
-        require_once __DIR__ .'/../myth/bootstrap.php';
+        // Reset the HTTP request to a blank slate.
+        $_SERVER['REQUEST_URI'] = '';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_GET = [];
+
+        // Prepare the App environment.
+        define('ENVIRONMENT', getenv('ENVIRONMENT') ?: 'development');
+        define('ROOTPATH', realpath('.') .'/');
+        define('APPPATH', realpath(ROOTPATH.'app') .'/');
+        define('TESTPATH', realpath(ROOTPATH.'tests') .'/');
+
+        $app = App::createFromGlobals();
+        $app->prepareEnvironment();
     })
     ->beforeEach(function () {
         // Reset the HTTP request to a blank slate.

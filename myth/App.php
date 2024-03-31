@@ -39,10 +39,7 @@ class App
     public function run()
     {
         try {
-            // Load .env file
-            (new \Myth\DotEnv(ROOTPATH .'/.env'))->load();
-
-            include ROOTPATH .'myth/helpers/common.php';
+            $this->prepareEnvironment();
 
             ob_start();
 
@@ -76,6 +73,14 @@ class App
         } catch (Throwable $e) {
             return $this->handleException($e);
         }
+    }
+
+    public function prepareEnvironment()
+    {
+        // Load .env file
+        (new \Myth\DotEnv(ROOTPATH .'/.env'))->load();
+
+        include ROOTPATH .'myth/helpers/common.php';
     }
 
     /**
