@@ -42,7 +42,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
-        "test": "vendor/bin/pest --coverage --coverage-html=build/coverage",
+        "test": "vendor/bin/pest --coverage --coverage-html=.build/coverage",
         "clean": [
             "@lint",
             "@style-fix",

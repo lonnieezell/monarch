@@ -10,7 +10,7 @@ $finder = Finder::create()
         __DIR__ . '/../tests/',
     ])
     ->exclude([
-        'build',
+        '.build',
     ])
 ;
 
