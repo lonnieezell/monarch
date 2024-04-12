@@ -42,7 +42,10 @@
             <div class="text-center pt-5">
                 <img src="/img/logo.png" alt="Monarch logo" class="mx-auto" style="max-width: 100px;">
             </div>
-            <p class="text-center pt-2 pb-5">Monarch is an experiment by <a href="https://github.com/lonnieezell" target="_blank">Lonnie Ezell</a></p>
+            <p class="text-center pt-2">Monarch is an experiment by <a href="https://github.com/lonnieezell" target="_blank">Lonnie Ezell</a></p>
+            <p class="text-center pt-2 pb-5 opacity-50">
+                Crafted by a kaleidoscope of butterflies in <strong>{elapsed_time}</strong> using <strong>{memory_usage}</strong> of memory.
+            </p>
         </footer>
     </div>
 
