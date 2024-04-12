@@ -1,4 +1,8 @@
-# Monarch
+<div style="text-align:center">
+    <img src="/assets/logo.png" style="margin: auto;">
+</div>
+
+# Monarch Web Framework
 
 Monarch is an exploration of how simple and flexible a small PHP framework can be.
 
