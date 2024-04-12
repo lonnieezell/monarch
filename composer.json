@@ -19,7 +19,7 @@
         "pestphp/pest": "^2.34",
         "pestphp/pest-plugin-drift": "^2.5"
     },
-    "autoload-dev": {
+    "autoload": {
         "psr-4": {
             "Monarch\\": "monarch/",
             "Tests\\": "tests/"

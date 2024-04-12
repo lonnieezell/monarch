@@ -39,7 +39,10 @@
             </div>
         </section>
         <footer>
-            <p class="text-center py-5">Myth:work is an experiment by <a href="https://github.com/lonnieezell" target="_blank">Lonnie Ezell</a></p>
+            <div class="text-center pt-5">
+                <img src="/img/logo.png" alt="Monarch logo" class="mx-auto" style="max-width: 100px;">
+            </div>
+            <p class="text-center pt-2 pb-5">Monarch is an experiment by <a href="https://github.com/lonnieezell" target="_blank">Lonnie Ezell</a></p>
         </footer>
     </div>
 
