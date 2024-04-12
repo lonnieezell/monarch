@@ -1,8 +1,8 @@
 <?php
 
-namespace Monarch\HTTP;
+declare(strict_types=1);
 
-use phpDocumentor\Reflection\Types\Null_;
+namespace Monarch\HTTP;
 
 /**
  * The HTTP Request class captures the details of the current request
@@ -40,6 +40,7 @@ class Request
         $request->host = $uriParts['host'] ?? '';
         $request->port = $uriParts['port'] ?? 80;
         $request->path = trim($uriParts['path'], '/');
+        unset($uriParts);
 
         $request->body = file_get_contents('php://input');
         $request->headers = function_exists('getallheaders')

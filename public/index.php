@@ -6,6 +6,7 @@ use Monarch\App;
 include_once '../vendor/autoload.php';
 
 // constants
+define('START_TIME', microtime(true));
 define('ENVIRONMENT', getenv('ENVIRONMENT') ?: 'development');
 define('ROOTPATH', realpath('..') .'/');
 define('APPPATH', realpath(ROOTPATH.'app') .'/');

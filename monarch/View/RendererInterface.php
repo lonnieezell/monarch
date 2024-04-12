@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Monarch\View;
 
 use Monarch\HTTP\Request;
