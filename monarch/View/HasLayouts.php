@@ -36,7 +36,7 @@ trait HasLayouts
         }
 
         // TODO: Allow for multiple named slots in the layout
-        return str_replace('<slot></slot>', $content, $layoutContent);
+        return str_replace('<slot></slot>', $content, (string) $layoutContent);
     }
 
     /**
@@ -61,7 +61,7 @@ trait HasLayouts
                 $content = $this->renderHTMLFile($testPath .'/+layout.php');
                 $layoutContent = empty($layoutContent)
                     ? $content
-                    : str_replace('<slot></slot>', $content, $layoutContent);
+                    : str_replace('<slot></slot>', $content, (string) $layoutContent);
             }
         }
 
@@ -80,7 +80,7 @@ trait HasLayouts
     protected function renderHTMLFile(string $file): string
     {
         if (! file_exists($file)) {
-            throw new \RuntimeException("View not found: {$file}");
+            throw new RuntimeException("View not found: {$file}");
         }
 
         // Make data available to the view

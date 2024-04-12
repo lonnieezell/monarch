@@ -106,7 +106,7 @@ class App
             throw $e;
         }
 
-        $type = get_class($e);
+        $type = $e::class;
         $message = $e->getMessage();
         $code = $e->getCode();
         $file = $e->getFile();

@@ -2,6 +2,7 @@
 
 namespace Monarch;
 
+use RuntimeException;
 /**
  * Class View
  *
@@ -48,14 +49,13 @@ class View
      * contents of partials within other views.
      *
      * @param string     $view
-     * @param array|null $data
      */
     public function display(string $file, ?array $data): string
     {
         $path = ROOTPATH."routes/{$file}.php";
 
         if (! file_exists($path)) {
-            throw new \RuntimeException("View not found: {$path}");
+            throw new RuntimeException("View not found: {$path}");
         }
 
         if (is_array($data)) {
@@ -67,18 +67,13 @@ class View
         return ob_get_clean() ?? '';
     }
 
-    /**
-     * @param array $data
-     */
-    public function render(array $data=[])
+    public function render(array $data = [])
     {
         return $this->display('theme/'. $this->layout, $data);
     }
 
     /**
      * Sets the layout view to use as our template.
-     *
-     * @param string $layout
      */
     public function extends(string $layout)
     {
@@ -88,8 +83,6 @@ class View
     /**
      * Starts capturing the output to insert
      * into a slot() in a template.
-     *
-     * @param string $name
      */
     public function startSlot(string $name)
     {
@@ -106,7 +99,7 @@ class View
         $contents = ob_get_clean();
 
         if (empty($this->currentSlot)) {
-            throw new \RuntimeException('Views, no current section.');
+            throw new RuntimeException('Views, no current section.');
         }
 
         // Ensure an array exists so we can store multiple entries for this.
@@ -122,7 +115,6 @@ class View
      * Creates a placeholder slot within a template files
      * that can have content defined in a different view.
      *
-     * @param string $name
      *
      * @return string
      */

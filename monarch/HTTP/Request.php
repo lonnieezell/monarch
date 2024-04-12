@@ -32,10 +32,10 @@ class Request
         $request = new static();
 
         $request->uri = $_SERVER['REQUEST_URI'];
-        $request->method = strtoupper($_SERVER['REQUEST_METHOD']);
+        $request->method = strtoupper((string) $_SERVER['REQUEST_METHOD']);
         $request->query = $_GET;
 
-        $uriParts = parse_url($request->uri);
+        $uriParts = parse_url((string) $request->uri);
         $request->scheme = $uriParts['scheme'] ?? 'http';
         $request->host = $uriParts['host'] ?? '';
         $request->port = $uriParts['port'] ?? 80;

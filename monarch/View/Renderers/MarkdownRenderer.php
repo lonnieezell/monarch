@@ -38,7 +38,7 @@ class MarkdownRenderer implements RendererInterface
     {
         $hasRequest = $this->request instanceof Request;
 
-        $content = $this->generateView($routeFile, $hasRequest);
+        $content = $this->generateView($routeFile);
 
         if (! $hasRequest) {
             return $content;
@@ -80,7 +80,7 @@ class MarkdownRenderer implements RendererInterface
     private function generateView(string $file): string
     {
         if (! file_exists($file)) {
-            throw new \RuntimeException("View not found: {$file}");
+            throw new RuntimeException("View not found: {$file}");
         }
 
         $converter = new CommonMarkConverter();

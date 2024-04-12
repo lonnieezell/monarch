@@ -2,6 +2,7 @@
 
 namespace Monarch;
 
+use RuntimeException;
 /**
  * Class Config
  *
@@ -32,7 +33,6 @@ class Config
     /**
      * Grab a config value from a file at app/config.
      *
-     * @param string $key
      *
      * @return array|mixed|null
      */
@@ -40,8 +40,8 @@ class Config
     {
         $keys = explode('.', $key);
 
-        if (! count($keys)) {
-            throw new \RuntimeException('Invalid config key: '. $key);
+        if ($keys === []) {
+            throw new RuntimeException('Invalid config key: '. $key);
         }
 
         $file = array_shift($keys);
@@ -50,7 +50,7 @@ class Config
             $path = ROOTPATH ."config/{$file}.php";
 
             if (! file_exists($path)) {
-                throw new \RuntimeException('Config file not found: '. $path);
+                throw new RuntimeException('Config file not found: '. $path);
             }
 
             $this->files[$file] = include $path;

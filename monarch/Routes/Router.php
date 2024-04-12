@@ -58,6 +58,7 @@ class Router
         $path = ltrim($request->path ?: 'index', '/');
         $path = strtolower($path);
         $path = str_replace(['/', '.'], DIRECTORY_SEPARATOR, $path);
+
         $routeFile = null;
         $searchFile = $this->basePath . $path;
 

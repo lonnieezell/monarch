@@ -2,6 +2,7 @@
 
 namespace Monarch;
 
+use RuntimeException;
 /**
  * Class DotEnv
  *
@@ -37,12 +38,12 @@ class DotEnv
         }
 
         if (!is_readable($this->path)) {
-            throw new \RuntimeException(sprintf('%s file is not readable', $this->path));
+            throw new RuntimeException(sprintf('%s file is not readable', $this->path));
         }
 
         $lines = file($this->path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {
-            if (strpos(trim($line), '#') === 0) {
+            if (str_starts_with(trim($line), '#')) {
                 continue;
             }
 

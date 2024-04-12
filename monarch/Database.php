@@ -28,8 +28,6 @@ class Database
 
     /**
      * Returns the connection to a
-     *
-     * @param string $group
      */
     public function connect(string $group = 'default')
     {
@@ -55,9 +53,7 @@ class Database
      * Magic to call the corresponding Redbean command statically
      * but still allow us to chain commands together.
      *
-     * @param string $method
      * @param        $args
-     *
      * @return $this
      */
     public function __call(string $method, $args)

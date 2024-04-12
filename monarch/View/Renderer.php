@@ -40,14 +40,14 @@ class Renderer
         $rendererName = null;
         $availableRenderers = Config::factory()->get('routes.renderers');
         foreach ($availableRenderers as $ext => $handler) {
-            if (substr($routeFile, -strlen($ext)) === $ext) {
+            if (str_ends_with($routeFile, (string) $ext)) {
                 $rendererName = $handler;
                 break;
             }
         }
 
         if ($rendererName === null) {
-            throw new \RuntimeException('No renderer found for file: '. $routeFile);
+            throw new RuntimeException('No renderer found for file: '. $routeFile);
         }
 
         return $rendererName::createWithRequest($this->request)

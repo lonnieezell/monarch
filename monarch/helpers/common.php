@@ -1,14 +1,16 @@
 <?php
 
+use Kint\Renderer\RichRenderer;
+use Myth\Config;
 /**
  * Setup Kint
  */
 Kint::$aliases[] = 'dd';
 Kint::$expanded = true;
-Kint\Renderer\RichRenderer::$theme = 'aante-light.css';
+RichRenderer::$theme = 'aante-light.css';
 
 if (! function_exists('dd')) {
-    function dd(...$vars)
+    function dd(...$vars): never
     {
         Kint::dump(...$vars);
         exit;
@@ -34,7 +36,7 @@ if (! function_exists('dd')) {
 if (! function_exists('config')) {
     function config(string $key)
     {
-        return \Myth\Config::factory()->get($key);
+        return Config::factory()->get($key);
     }
 }
 
@@ -63,8 +65,6 @@ if (! function_exists('dot_array_search')) {
      *
      * Originally written by me for CodeIgniter 4 framework
      *
-     * @param array $indexes
-     * @param array $array
      *
      * @return mixed|null
      */
@@ -96,7 +96,7 @@ if (! function_exists('dot_array_search')) {
 
         // If this is the last index, make sure to return it now,
         // and not try to recurse through things.
-        if (empty($indexes)) {
+        if ($indexes === []) {
             return $array[$currentIndex];
         }
 
