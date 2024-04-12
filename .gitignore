@@ -10,5 +10,6 @@ phpunit
 
 .idea/
 .vscode/
+build/
 
 .env
