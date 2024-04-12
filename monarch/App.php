@@ -1,11 +1,10 @@
 <?php
 
-namespace Myth;
+namespace Monarch;
 
-use Myth\HTTP\Request;
-use Myth\Routes\Router;
-use Myth\View\Renderer;
-use RuntimeException;
+use Monarch\HTTP\Request;
+use Monarch\Routes\Router;
+use Monarch\View\Renderer;
 use Throwable;
 
 class App
@@ -78,9 +77,9 @@ class App
     public function prepareEnvironment()
     {
         // Load .env file
-        (new \Myth\DotEnv(ROOTPATH .'/.env'))->load();
+        (new DotEnv(ROOTPATH .'/.env'))->load();
 
-        include ROOTPATH .'myth/helpers/common.php';
+        include ROOTPATH .'monarch/helpers/common.php';
     }
 
     /**

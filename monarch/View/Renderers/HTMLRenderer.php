@@ -1,10 +1,10 @@
 <?php
 
-namespace Myth\View\Renderers;
+namespace Monarch\View\Renderers;
 
-use Myth\HTTP\Request;
-use Myth\View\HasLayouts;
-use Myth\View\RendererInterface;
+use Monarch\HTTP\Request;
+use Monarch\View\HasLayouts;
+use Monarch\View\RendererInterface;
 use RuntimeException;
 
 class HTMLRenderer implements RendererInterface

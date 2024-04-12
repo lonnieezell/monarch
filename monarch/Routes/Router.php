@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Myth\Routes;
+namespace Monarch\Routes;
 
-use Myth\Config;
-use Myth\HTTP\Request;
+use Monarch\Config;
+use Monarch\HTTP\Request;
 
 /**
  * Given a URL and a base folder, this class will attempt to determine the
@@ -60,8 +60,13 @@ class Router
         $path = str_replace(['/', '.'], DIRECTORY_SEPARATOR, $path);
         $routeFile = null;
         $searchFile = $this->basePath . $path;
-        $controlFile = $this->basePath . $path . '.control.php';
 
+        // Handle when directory name matches route and has an index file.
+        if (is_dir($searchFile)) {
+            $searchFile .= '/index';
+        }
+
+        $controlFile = $this->basePath . $path . '.control.php';
         $availableRouteTypes = Config::factory()->get('routes.renderers');
 
         foreach ($availableRouteTypes as $ext => $handler) {

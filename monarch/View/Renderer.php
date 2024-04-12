@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Myth\View;
+namespace Monarch\View;
 
-use Myth\Config;
-use Myth\HTTP\Request;
-use Myth\View\Renderers\HTMLRenderer;
+use Monarch\Config;
+use Monarch\HTTP\Request;
+use Monarch\View\Renderers\HTMLRenderer;
 use RuntimeException;
 
 class Renderer

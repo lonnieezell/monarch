@@ -1,6 +1,6 @@
 <?php
 
-namespace Myth;
+namespace Monarch;
 
 /**
  * Class Config

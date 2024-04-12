@@ -1,6 +1,6 @@
 <?php
 
-use Myth\App;
+use Monarch\App;
 
 // Hook up Composer
 include_once '../vendor/autoload.php';

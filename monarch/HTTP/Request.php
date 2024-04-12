@@ -1,6 +1,6 @@
 <?php
 
-namespace Myth\HTTP;
+namespace Monarch\HTTP;
 
 use phpDocumentor\Reflection\Types\Null_;
 

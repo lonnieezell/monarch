@@ -1,7 +1,7 @@
 <?php
 
-use Myth\HTTP\Request;
-use Myth\Routes\Router;
+use Monarch\HTTP\Request;
+use Monarch\Routes\Router;
 
 describe('router', function () {
     test('can set base path', function () {

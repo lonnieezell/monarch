@@ -1,8 +1,8 @@
 <?php
 
-namespace Myth\View;
+namespace Monarch\View;
 
-use Myth\HTTP\Request;
+use Monarch\HTTP\Request;
 
 interface RendererInterface
 {

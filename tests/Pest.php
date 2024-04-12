@@ -11,7 +11,7 @@
 |
 */
 
-use Myth\App;
+use Monarch\App;
 use Tests\TestCase;
 
 uses(TestCase::class)

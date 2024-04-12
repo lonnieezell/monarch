@@ -1,8 +1,8 @@
 <?php
 
-namespace Myth\View;
+namespace Monarch\View;
 
-use Myth\HTTP\Request;
+use Monarch\HTTP\Request;
 use RuntimeException;
 
 /**
@@ -42,7 +42,6 @@ trait HasLayouts
     /**
      * Crafts the layout for the page.
      *
-     * TODO: needs to recursively search the directories to the current level.
      * @return string
      */
     protected function buildLayout(string $routeFile): string

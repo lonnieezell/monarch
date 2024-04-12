@@ -1,4 +1,6 @@
-<?php namespace Myth;
+<?php
+
+namespace Monarch;
 
 use RedBeanPHP\R;
 
@@ -13,7 +15,7 @@ use RedBeanPHP\R;
  */
 class Database
 {
-    static public $instance;
+    public static $instance;
 
     public static function factory()
     {

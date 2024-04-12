@@ -1,7 +1,7 @@
 <?php
 
-use Myth\View\Renderers\HTMLRenderer;
-use Myth\View\Renderers\MarkdownRenderer;
+use Monarch\View\Renderers\HTMLRenderer;
+use Monarch\View\Renderers\MarkdownRenderer;
 
 return [
     'renderers' => [

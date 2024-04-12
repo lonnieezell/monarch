@@ -1,6 +1,6 @@
 <?php
 
-use Myth\HTTP\Request;
+use Monarch\HTTP\Request;
 
 describe('create from globals', function () {
     test('returns a request instance', function () {

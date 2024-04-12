@@ -1,7 +1,7 @@
 {
-    "name": "lonnieezell/myth-work",
+    "name": "lonnieezell/monarch",
     "type": "project",
-    "description": "An opinionated PHP framework with an old-school feel and modern sensibilities.",
+    "description": "A back-to-basics framework for the modern web.",
     "license": "MIT",
     "authors": [
         {
@@ -12,7 +12,6 @@
     ],
     "require": {
         "php": ">=8.1",
-        "gabordemooij/redbean": "dev-master",
         "league/commonmark": "^2.4"
     },
     "require-dev": {
@@ -22,7 +21,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Myth\\": "myth/",
+            "Monarch\\": "monarch/",
             "Tests\\": "tests/"
         }
     },

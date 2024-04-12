@@ -1,7 +1,7 @@
 <?php
 
-use Myth\View\Renderer;
-use Myth\HTTP\Request;
+use Monarch\View\Renderer;
+use Monarch\HTTP\Request;
 
 describe('HTML renderer', function () {
     test('uses layouts root level', function () {
