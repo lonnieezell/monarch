@@ -15,9 +15,14 @@
         "league/commonmark": "^2.4"
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.49",
         "kint-php/kint": "^3.3",
         "pestphp/pest": "^2.34",
-        "pestphp/pest-plugin-drift": "^2.5"
+        "pestphp/pest-plugin-drift": "^2.5",
+        "php-parallel-lint/php-console-highlighter": "^1.0",
+        "php-parallel-lint/php-parallel-lint": "^1.3",
+        "rector/rector": "^1.0",
+        "roave/security-advisories": "dev-latest"
     },
     "autoload": {
         "psr-4": {
@@ -26,8 +31,27 @@
         }
     },
     "config": {
+        "optimize-autoloader": false,
+        "preferred-install": "dist",
+        "sort-packages": true,
         "allow-plugins": {
+            "phpstan/extension-installer": true,
             "pestphp/pest-plugin": true
         }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {
+        "test": "vendor/bin/pest --coverage --coverage-html=build/coverage",
+        "clean": [
+            "@lint",
+            "@style-fix",
+            "@rector-fix"
+        ],
+        "lint": "vendor/bin/parallel-lint --exclude .git --exclude vendor .",
+        "rector": "rector process --config .config/rector.php --dry-run",
+        "rector-fix": "rector process --config .config/rector.php",
+        "style": "php-cs-fixer fix --config=.config/.php-cs-fixer.dist.php --dry-run",
+        "style-fix": "php-cs-fixer --config=.config/.php-cs-fixer.dist.php fix"
     }
 }
