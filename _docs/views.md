@@ -1,6 +1,6 @@
 # Viewing Routes
 
-While the routes documentation provides a high-level overview of how routes work in Myth:work, that information is more geared towards how the routes are found. This document details how the views are combined and displayed to the user.
+While the routes documentation provides a high-level overview of how routes work in Monarch, that information is more geared towards how the routes are found. This document details how the views are combined and displayed to the user.
 
 ## Layouts
 
@@ -12,7 +12,7 @@ Layouts are special files that define the primary HTML structure of a page that 
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Myth:work</title>
+        <title>Monarch</title>
     </head>
     <body>
         <slot></slot>
@@ -30,7 +30,7 @@ A root-level layout file might look like this:
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Myth:work</title>
+        <title>Monarch</title>
     </head>
     <body>
         <h1>First Layout</h1>
@@ -52,7 +52,7 @@ This would result in the following HTML structure:
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Myth:work</title>
+        <title>Monarch</title>
     </head>
     <body>
         <h1>First Layout</h1>
@@ -66,7 +66,7 @@ The route file would then be inserted in the second layout's slot.
 
 ## Route Types
 
-Myth:work supports the following route types:
+Monarch supports the following route types:
 
 -   Web pages
 -   Web page fragments

@@ -1,13 +1,13 @@
-# Myth:work
+# Monarch
 
-Myth:work is an exploration of how simple and flexible a small PHP framework can be.
+Monarch is an exploration of how simple and flexible a small PHP framework can be.
 
 Its goal is to provide the minimum amount of tools and structure to help you create a web application,
 while providing a structure that is easy to understand and maintain.
 
 ## Folder Structure
 
-The following folders are used within Myth:work:
+The following folders are used within Monarch:
 
 ```
 app/
@@ -30,7 +30,7 @@ Contains all of the configuration files for your application.
 
 ### myth/
 
-This is the core of the Myth:work framework. It contains all of the code that makes Myth:work work.
+This is the core of the Monarch framework. It contains all of the code that makes Monarch work.
 
 ### public/
 

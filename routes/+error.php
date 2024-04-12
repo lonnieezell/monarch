@@ -32,7 +32,7 @@
         </section>
 
         <footer>
-            <p class="text-center py-5">Myth:work is an experiment by <a href="https://github.com/lonnieezell" target="_blank">Lonnie Ezell</a></p>
+            <p class="text-center py-5">Monarch is an experiment by <a href="https://github.com/lonnieezell" target="_blank">Lonnie Ezell</a></p>
         </footer>
     </div>
 

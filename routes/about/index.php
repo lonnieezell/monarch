@@ -1,6 +1,6 @@
 <h2>What Are We Using?</h2>
 
-<p>Myth:work is built on the following tools:</p>
+<p>Monarch is built on the following tools:</p>
 
 <ul>
     <li>PHP 8</li>

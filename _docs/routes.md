@@ -1,6 +1,6 @@
 # Routes
 
-Routing a URI to the code that should execute it is a fundamental part of any web application. In Myth:work, routes are defined using a folder-based approach.
+Routing a URI to the code that should execute it is a fundamental part of any web application. In Monarch, routes are defined using a folder-based approach.
 Each URI is directly associated with a route file. The route file is a file that determines what happens when a user visits a specific URI.
 
 An example folder structure might look like this:
@@ -38,7 +38,7 @@ All web files at that folder level will use the combined layout files.
 
 ## Route Types
 
-By default, Myth:work supports the following route types:
+By default, Monarch supports the following route types:
 
 -   Web pages
 -   Web page fragments
