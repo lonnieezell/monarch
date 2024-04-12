@@ -22,10 +22,19 @@ uses(TestCase::class)
         $_GET = [];
 
         // Prepare the App environment.
-        define('ENVIRONMENT', getenv('ENVIRONMENT') ?: 'development');
-        define('ROOTPATH', realpath('.') .'/');
-        define('APPPATH', realpath(ROOTPATH.'app') .'/');
-        define('TESTPATH', realpath(ROOTPATH.'tests') .'/');
+        if (! defined('ENVIRONMENT')) {
+            define('ENVIRONMENT', 'testing');
+        }
+        if (! defined('ROOTPATH')) {
+            define('ROOTPATH', realpath('.') .'/');
+        }
+        if (! defined('APPPATH')) {
+            define('APPPATH', realpath(ROOTPATH.'app') .'/');
+        }
+        if (! defined('TESTPATH')) {
+            define('TESTPATH', realpath(ROOTPATH.'tests') .'/');
+        }
+
 
         $app = App::createFromGlobals();
         $app->prepareEnvironment();

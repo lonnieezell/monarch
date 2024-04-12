@@ -7,10 +7,12 @@ Kint::$aliases[] = 'dd';
 Kint::$expanded = true;
 Kint\Renderer\RichRenderer::$theme = 'aante-light.css';
 
-function dd(...$vars)
-{
-	Kint::dump(...$vars);
-	exit;
+if (! function_exists('dd')) {
+    function dd(...$vars)
+    {
+        Kint::dump(...$vars);
+        exit;
+    }
 }
 
 /**
@@ -29,20 +31,11 @@ function dd(...$vars)
  *
  * @return mixed
  */
-function config(string $key)
-{
-    return \Myth\Config::factory()->get($key);
-}
-
-/**
- * Provides a thin wrapper around the RedBean database library.
- *
- * @param string $group
- *
- * @return mixed
- */
-function db_connect(string $group='default') {
-    return \Myth\Database::factory()->connect($group);
+if (! function_exists('config')) {
+    function config(string $key)
+    {
+        return \Myth\Config::factory()->get($key);
+    }
 }
 
 /**
@@ -56,69 +49,65 @@ function db_connect(string $group='default') {
  *
  * @return mixed|null
  */
-function dot_array_search(string $index, array $array)
-{
-    $segments = explode('.', rtrim(rtrim($index, '* '), '.'));
+if (! function_exists('dot_array_search')) {
+    function dot_array_search(string $index, array $array)
+    {
+        $segments = explode('.', rtrim(rtrim($index, '* '), '.'));
 
-    return _array_search_dot($segments, $array);
-}
+        return _array_search_dot($segments, $array);
+    }
 
-/**
- * Used by dot_array_search to recursively search the
- * array with wildcards.
- *
- * Originally written by me for CodeIgniter 4 framework
- *
- * @param array $indexes
- * @param array $array
- *
- * @return mixed|null
- */
-function _array_search_dot(array $indexes, array $array)
-{
-    // Grab the current index
-    $currentIndex = $indexes
+    /**
+     * Used by dot_array_search to recursively search the
+     * array with wildcards.
+     *
+     * Originally written by me for CodeIgniter 4 framework
+     *
+     * @param array $indexes
+     * @param array $array
+     *
+     * @return mixed|null
+     */
+    function _array_search_dot(array $indexes, array $array)
+    {
+        // Grab the current index
+        $currentIndex = $indexes
         ? array_shift($indexes)
         : null;
 
-    if ((empty($currentIndex) && (int) $currentIndex !== 0) || (! isset($array[$currentIndex]) && $currentIndex !== '*'))
-    {
-        return null;
-    }
-
-    // Handle Wildcard (*)
-    if ($currentIndex === '*')
-    {
-        // If $array has more than 1 item, we have to loop over each.
-        foreach ($array as $value)
-        {
-            $answer = _array_search_dot($indexes, $value);
-
-            if ($answer !== null)
-            {
-                return $answer;
-            }
+        if ((empty($currentIndex) && (int) $currentIndex !== 0) || (! isset($array[$currentIndex]) && $currentIndex !== '*')) {
+            return null;
         }
 
-        // Still here after searching all child nodes?
-        return null;
-    }
+        // Handle Wildcard (*)
+        if ($currentIndex === '*') {
+            // If $array has more than 1 item, we have to loop over each.
+            foreach ($array as $value) {
+                $answer = _array_search_dot($indexes, $value);
 
-    // If this is the last index, make sure to return it now,
-    // and not try to recurse through things.
-    if (empty($indexes))
-    {
+                if ($answer !== null) {
+                    return $answer;
+                }
+            }
+
+            // Still here after searching all child nodes?
+            return null;
+        }
+
+        // If this is the last index, make sure to return it now,
+        // and not try to recurse through things.
+        if (empty($indexes)) {
+            return $array[$currentIndex];
+        }
+
+        // Do we need to recursively search this value?
+        if (is_array($array[$currentIndex]) && $array[$currentIndex]) {
+            return _array_search_dot($indexes, $array[$currentIndex]);
+        }
+
+        // Otherwise we've found our match!
         return $array[$currentIndex];
     }
-
-    // Do we need to recursively search this value?
-    if (is_array($array[$currentIndex]) && $array[$currentIndex])
-    {
-        return _array_search_dot($indexes, $array[$currentIndex]);
-    }
-
-    // Otherwise we've found our match!
-    return $array[$currentIndex];
 }
 
 /**
@@ -129,20 +118,13 @@ function _array_search_dot(array $indexes, array $array)
  *
  * @return array|false|string|null
  */
-function env(string $key, ?string $default)
-{
-    $value = getenv($key);
+if (! function_exists('env')) {
+    function env(string $key, ?string $default)
+    {
+        $value = getenv($key);
 
-    return $value !== false
+        return $value !== false
         ? $value
         : $default;
+    }
 }
-
-/**
- * View Service
- */
-function view()
-{
-	return \Myth\View::factory();
-}
-
