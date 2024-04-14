@@ -47,7 +47,7 @@ class App
 
             $router = new Router();
             $router->setBasePath(ROOTPATH .'routes');
-            [$routeFile, $controlFile] = $router->getFilesForRequest($this->request);
+            [$routeFile, $controlFile, $routeParams] = $router->getFilesForRequest($this->request);
 
             // Defaults
             $content = 'index';

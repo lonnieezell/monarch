@@ -101,3 +101,29 @@ return new class()
     }
 }
 ```
+
+## Dynamic Routes
+
+Dynamic routes are routes that contain variables within the URI. For example, a route that handles a blog post might look like this:
+
+```
+routes/
+   blog/
+      post[id].php
+```
+
+In this example, the `post[id].php` file would handle the `/blog/post/123` URI. The `id` variable would be available within the control file as a parameter.
+
+```php
+<?php
+
+return new class()
+{
+    public function get(int $id): string
+    {
+        return 'The post ID is: ' . $id;
+    }
+}
+```
+
+You many include as many dynamic variables as you need within the route file. They will be passed to the control file in the order they are defined.
