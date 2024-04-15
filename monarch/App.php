@@ -53,10 +53,10 @@ class App
             $content = 'index';
             $data = [];
 
-            $control = $controlFile !== null ? include $controlFile : null;
+            $control = $controlFile !== '' ? include $controlFile : null;
 
             if ($control && method_exists($control, strtolower($this->request->method))) {
-                $output = $control->{strtolower($this->request->method)}();
+                $output = $control->{strtolower($this->request->method)}(...($routeParams ?? []));
 
                 if (is_array($output)) {
                     $content = $output['content'] ?? $content;
@@ -69,7 +69,7 @@ class App
             $renderer = Renderer::createWithRequest($this->request);
             $output = $renderer
                 ->withRouteParams(content: $content, data: $data)
-                ->render($routeFile);
+                ->render($routeFile) ?? '';
 
             $output = $this->replacePerformanceMarkers($output);
 

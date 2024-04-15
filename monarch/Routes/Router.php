@@ -6,6 +6,8 @@ namespace Monarch\Routes;
 
 use Monarch\Config;
 use Monarch\HTTP\Request;
+use RuntimeException;
+use SplFixedArray;
 
 /**
  * Given a URL and a base folder, this class will attempt to determine the
@@ -59,18 +61,21 @@ class Router
         $path = strtolower($path);
         $path = str_replace(['/', '.'], DIRECTORY_SEPARATOR, $path);
 
-        $routeFile = null;
-        $controlFile = null;
-        $searchFile = $this->basePath . $path;
+        $routeFile = '';
+        $controlFile = '';
+
+        // Do we have a direct match?
+        [$routeFile, $controlFile] = $this->searchForFiles($this->basePath . $path .'.*');
 
         // Handle when directory name matches route and has an index file.
-        if (is_dir($searchFile)) {
-            $searchFile .= '/index';
+        if ($routeFile === '' && is_dir($this->basePath . $path)) {
+            // $patterns[] = $this->basePath . $path .'/index.*';
+            [$routeFile, $controlFile] = $this->searchForFiles($this->basePath . $path .'/index.*');
         }
 
-        if (strpos($searchFile, '/') !== false) {
+        // Check for files with placeholders in the path
+        if ($routeFile === '' && strpos($path, '/') !== false) {
             $segments = explode('/', $path);
-            $searchPath = '';
             $pathRoute = '';
 
             while (count($segments)) {
@@ -82,39 +87,48 @@ class Router
                     return $carry .'\[*\]';
                 });
 
-                // Allow for any extension
-                $searchPath .= '.*';
+                [$routeFile, $controlFile] = $this->searchForFiles($this->basePath . ltrim($searchPath, DIRECTORY_SEPARATOR) . '.*');
 
-                // Check for a file with the current path
-                $result = glob($this->basePath . ltrim($searchPath, DIRECTORY_SEPARATOR));
-                if (is_array($result) && count($result) > 0) {
-                    $routeFile = $result[0];
-
-                    // If 2 matches, then the control file is the first one
-                    if (count($result) === 2) {
-                        $controlFile = $result[0];
-                        $routeFile = $result[1];
-                    }
-
+                if ($routeFile !== '') {
                     break;
                 }
-            }
-        }
-
-        $availableRouteTypes = Config::factory()->get('routes.renderers');
-
-        foreach ($availableRouteTypes as $ext => $handler) {
-            if (substr_compare($searchFile, $ext, -strlen($ext)) === 0) {
-                $routeFile = $searchFile;
-                break;
             }
         }
 
         return [
             $routeFile,
             $controlFile,
-            $this->getRouteParams($path, $searchPath, $routeFile)
+            $this->getRouteParams($path, $searchPath ?? '', $routeFile)
         ];
+    }
+
+    /**
+     * Searches for route and control files based on a pattern.
+     *
+     * @return array [routeFile, controlFile]
+     * @throws RuntimeException
+     */
+    private function searchForFiles(string $pattern): array
+    {
+        $routeFile = '';
+        $controlFile = '';
+        $result = glob($pattern);
+
+        if ($result === false) {
+            throw new RuntimeException('Error scanning for route files.');
+        }
+
+        if (is_array($result) && count($result) > 0) {
+            $routeFile = $result[0];
+
+            // If 2 matches, then the control file is the first one
+            if (count($result) === 2) {
+                $controlFile = $result[0];
+                $routeFile = $result[1];
+            }
+        }
+
+        return [$routeFile, $controlFile];
     }
 
     /**
@@ -125,7 +139,7 @@ class Router
     {
         $params = [];
 
-        if (empty($searchPath)) {
+        if ($searchPath === '') {
             return null;
         }
 
