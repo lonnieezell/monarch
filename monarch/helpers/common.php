@@ -1,7 +1,9 @@
 <?php
 
 use Kint\Renderer\RichRenderer;
+use Monarch\View\Meta;
 use Myth\Config;
+
 /**
  * Setup Kint
  */
@@ -126,5 +128,15 @@ if (! function_exists('env')) {
         return $value !== false
         ? $value
         : $default;
+    }
+}
+
+/**
+ * Gets the View\Meta instance.
+ */
+if (! function_exists('viewMeta')) {
+    function viewMeta(): Meta
+    {
+        return Meta::instance();
     }
 }

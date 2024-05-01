@@ -4,12 +4,15 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title></title>
+    <title><?= viewMeta()->title() ?></title>
 
-    <meta name="description" content="">
+    <?= viewMeta()->output('meta') ?>
 
     <link href="/css/vendor/bootstrap-5.3.min.css" rel="stylesheet">
+    <?= viewMeta()->output('styles') ?>
     <script src="/js/vendor/htmx-1.9.11.min.js"></script>
+    <?= viewMeta()->output('scripts') ?>
+    <?= viewMeta()->output('rawScripts') ?>
 </head>
 
 <body>

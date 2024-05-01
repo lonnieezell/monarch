@@ -5,6 +5,11 @@ declare(strict_types=1);
 namespace Monarch\View\Renderers;
 
 use League\CommonMark\CommonMarkConverter;
+use League\CommonMark\Environment\Environment;
+use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
+use League\CommonMark\Extension\FrontMatter\FrontMatterExtension;
+use League\CommonMark\Extension\FrontMatter\Output\RenderedContentWithFrontMatter;
+use League\CommonMark\MarkdownConverter;
 use Monarch\HTTP\Request;
 use Monarch\View\HasLayouts;
 use Monarch\View\RendererInterface;
@@ -85,8 +90,19 @@ class MarkdownRenderer implements RendererInterface
             throw new RuntimeException("View not found: {$file}");
         }
 
-        $converter = new CommonMarkConverter();
-        $markdown = $converter->convert(file_get_contents($file))->getContent();
+        $environment = new Environment([]);
+        $environment->addExtension(new CommonMarkCoreExtension());
+        $environment->addExtension(new FrontMatterExtension());
+
+        $converter = new MarkdownConverter($environment);
+
+        $markdown = $converter->convert(file_get_contents($file));
+
+        if ($markdown instanceof RenderedContentWithFrontMatter) {
+            $this->addViewMeta($markdown->getFrontMatter());
+        }
+
+        $markdown = $markdown->getContent();
 
         // TODO - Escape the content and data before replacing
         // Do some string replacement with content and data before returning
@@ -101,5 +117,42 @@ class MarkdownRenderer implements RendererInterface
         }
 
         return $markdown;
+    }
+
+    /**
+     * Given the frontmatter from a Markdown file, adds the appropriate
+     * meta tags to the view.
+     *
+     * @return void
+     */
+    private function addViewMeta(array $frontMatter): void
+    {
+        $meta = viewMeta();
+
+        if (isset($frontMatter['title'])) {
+            $meta->setTitle($frontMatter['title']);
+        }
+
+        if (isset($frontMatter['description'])) {
+            $meta->addMeta(['description' => $frontMatter['description']]);
+        }
+
+        if (isset($frontMatter['meta'])) {
+            foreach ($frontMatter['meta'] as $meta) {
+                viewMeta()->addMeta($meta);
+            }
+        }
+
+        if (isset($frontMatter['styles'])) {
+            foreach ($frontMatter['styles'] as $style) {
+                viewMeta()->addStyle($style);
+            }
+        }
+
+        if (isset($frontMatter['scripts'])) {
+            foreach ($frontMatter['scripts'] as $script) {
+                viewMeta()->addScript($script);
+            }
+        }
     }
 }
