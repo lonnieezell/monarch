@@ -21,6 +21,8 @@ class Request
     public readonly string $body;
     public readonly array $headers;
 
+    private static ?Request $instance = null;
+
     /**
      * Creates a new Request object from the current global state.
      *
@@ -47,7 +49,9 @@ class Request
             ? \getallheaders()
             : [];
 
-        return $request;
+        self::$instance = $request;
+
+        return self::$instance;
     }
 
     /**
@@ -81,7 +85,21 @@ class Request
         $request->body = $data['body'] ?? '';
         $request->headers = $data['headers'] ?? [];
 
-        return $request;
+        static::$instance = $request;
+
+        return static::$instance;
+    }
+
+    /**
+     * Returns the current instance of the Request object.
+     */
+    public static function instance(): static
+    {
+        if (static::$instance === null) {
+            static::$instance = static::createFromGlobals();
+        }
+
+        return static::$instance;
     }
 
     /**

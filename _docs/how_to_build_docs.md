@@ -19,13 +19,13 @@ pip3 install mkdocs-redirects
 
 ## Build the Docs
 
-```consolse
+```console
 mkdocs build
 ```
 
 ## See the Docs
 
-```consolse
+```console
 mkdocs serve
 ```
 

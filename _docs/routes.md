@@ -127,3 +127,205 @@ return new class()
 ```
 
 You many include as many dynamic variables as you need within the route file. They will be passed to the control file in the order they are defined.
+
+## API Routes
+
+API routes are similar to control files, but they are designed to return JSON data instead of HTML content. API routes are defined by using the `.api.php` extension. The class should extend the `Monarch\API` class, which provides helper methods for responding to API requests and handling errors.
+
+```php
+<?php
+
+use Monarch\API;
+
+return new class() extends API
+{
+    public function get(): array
+    {
+        return $this->respond([
+            'message' => 'Hello, World!',
+        ]);
+    }
+}
+```
+
+Like control routes, API routes should have methods that match the HTTP verbs you want to handle. Any data returned must be either null or an array that can be converted to JSON.
+
+### Response Methods
+
+API routes have access to the following response methods:
+
+-   `respond(array $data): array` - Respond with a JSON object.
+-   `withStatus(int $status ?string $message=null): self` - Set the status code of the response.
+
+```php
+public function get()
+{
+    return $this->respond([
+        'message' => 'Resource created',
+    ])->withStatus(200);
+}
+```
+
+-  `fail(?string $description=null)` - Respond with an error message. If a description is provided, it will be included in the response, otherwise the message will be "Unknown Error". The response also includes the timestamp of the error, the status code, and the URI path that caused the error.
+
+```php
+public function get()
+{
+    $resource = $this->getResource();
+
+    if (! $resource) {
+        return $this->fail('Resource not found');
+    }
+}
+
+// Returns the following JSON:
+{
+    "error": "Resource not found",
+    "message": "Resource not found",
+    "timestamp": "2021-10-01 12:00:00",
+    "status": 404,
+    "path": "/api/resource/123"
+}
+```
+
+- `respondCreated(array $body, ?string $message = null)` - Respond with a 201 status code and a JSON object. The body of the response is the data provided in the `$body` parameter. If a message is provided, it will be included in the response.
+
+```php
+public function post()
+{
+    $resource = $this->createResource();
+
+    return $this->respondCreated($resource, 'Resource created');
+}
+```
+
+- `respondDeleted(array $body, ?string $message = null)` - Respond with a 200 status code and a JSON object. The body of the response is the data provided in the `$body` parameter. If a message is provided, it will be included in the response.
+
+```php
+public function delete()
+{
+    $resource = $this->deleteResource();
+
+    return $this->respondDeleted($resource, 'Resource deleted');
+}
+```
+
+- `respondUpdated(array $body, ?string $message = null)` - Respond with a 200 status code and a JSON object. The body of the response is the data provided in the `$body` parameter. If a message is provided, it will be included in the response.
+
+```php
+public function put()
+{
+    $resource = $this->updateResource();
+
+    return $this->respondUpdated($resource, 'Resource updated');
+}
+```
+
+- `respondNoContent(?string $message = null)` - Respond with a 204 status code and no content. If a message is provided, it will be included in the response.
+
+```php
+public function delete()
+{
+    $this->deleteResource();
+
+    return $this->respondNoContent('Resource deleted');
+}
+```
+
+- `failUnauthorized(?string $error = null)` - Respond with a 401 status code and an error message. If an error string is provided, it will be included in the response, otherwise the message will be "Unauthorized".
+
+```php
+public function get()
+{
+    if (! $this->isAuthorized()) {
+        return $this->failUnauthorized('Unauthorized');
+    }
+}
+```
+
+- `failForbidden(?string $error = null)` - Respond with a 403 status code and an error message. If an error string is provided, it will be included in the response, otherwise the message will be "Forbidden".
+
+```php
+public function get()
+{
+    if (! $this->isAuthorized()) {
+        return $this->failForbidden('Forbidden');
+    }
+}
+```
+
+- `failNotFound(?string $error = null)` - Respond with a 404 status code and an error message. If an error string is provided, it will be included in the response, otherwise the message will be "Not Found".
+
+```php
+public function get()
+{
+    $resource = $this->getResource();
+
+    if (! $resource) {
+        return $this->failNotFound('Resource not found');
+    }
+}
+```
+
+- `failValidationError(string $error = 'Bad Request')` - Respond with a 400 status code and an error message. If an error string is provided, it will be included in the response, otherwise the message will be "Bad Request". Used when the data provided by the client cannot be validated.
+
+```php
+public function post()
+{
+    $data = $this->getRequestData();
+
+    if (! $this->validateData($data)) {
+        return $this->failValidationError('Invalid data');
+    }
+}
+```
+
+- `failValidationErrors(array $errors)` - Respond with a 400 status code and an array of error messages. The error message is a JSON object that contains the errors provided in the `$errors` parameter. Used when the data provided by the client cannot be validated for one or more fields.
+
+```php
+public function post()
+{
+    $errors = $this->validateData($data);
+
+    if ($errors) {
+        return $this->failValidationErrors($errors);
+    }
+}
+```
+
+- `failResourceExists(string $description = 'Conflict')` - Respond with a 409 status code and an error message. If an error string is provided, it will be included in the response, otherwise the message will be "Conflict". Used when the resource already exists and cannot be created.
+
+```php
+public function post()
+{
+    $resource = $this->getResource();
+
+    if ($resource) {
+        return $this->failResourceExists('Resource already exists');
+    }
+}
+```
+
+- `failResourceGone(string $description = 'Gone')` - Respond with a 410 status code and an error message. If an error string is provided, it will be included in the response, otherwise the message will be "Gone". Used when the resource has been deleted and cannot be accessed.
+
+```php
+public function get()
+{
+    $resource = $this->getResource();
+
+    if (! $resource) {
+        return $this->failResourceGone('Resource has been deleted');
+    }
+}
+```
+
+- `failTooManyRequests(string $description = 'Too Many Requests')` - Respond with a 429 status code and an error message. If an error string is provided, it will be included in the response, otherwise the message will be "Too Many Requests". Used when the client has sent too many requests in a given amount of time.
+
+```php
+public function get()
+{
+    if ($this->isRateLimited()) {
+        return $this->failTooManyRequests('Rate limit exceeded');
+    }
+}
+```
