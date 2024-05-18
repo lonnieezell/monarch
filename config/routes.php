@@ -10,4 +10,13 @@ return [
         '.php' => HTMLRenderer::class,
         '.md' => MarkdownRenderer::class,
     ],
+    'middleware' => [
+        'web' => [
+            'Monarch\Middleware\CSRF',
+            'Monarch\Middleware\Session',
+        ],
+        'api' => [
+            //
+        ],
+    ],
 ];

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Monarch;
 
 use Monarch\Helpers\Numbers;
+use Monarch\HTTP\Middleware;
 use Monarch\HTTP\Request;
+use Monarch\HTTP\Response;
 use Monarch\Routes\Router;
 use Monarch\View\Renderer;
 use Throwable;
@@ -45,35 +47,38 @@ class App
 
             ob_start();
 
+            // Get the control file, if exists
             $router = new Router();
             $router->setBasePath(ROOTPATH .'routes');
             [$routeFile, $controlFile, $routeParams] = $router->getFilesForRequest($this->request);
 
-            // Defaults
-            $content = 'index';
-            $data = [];
-
+            /** @var object */
             $control = $controlFile !== '' ? include $controlFile : null;
 
-            if ($control && method_exists($control, strtolower($this->request->method))) {
-                $output = $control->{strtolower($this->request->method)}(...($routeParams ?? []));
+            $action = fn (Request $request, Response $response) => $router->display(
+                request: $request,
+                routeFile: $routeFile,
+                control: $control,
+                routeParams: $routeParams
+            );
 
-                if (is_array($output)) {
-                    $content = $output['content'] ?? $content;
-                    $data = $output['data'] ?? $output;
-                } elseif (is_string($output)) {
-                    $content = $output;
+            // Run the middleware
+            $request = $this->request;
+            $middleware = Middleware::forRequest($request)->forControl($control);
+            $response = Response::createFromRequest($request);
+
+            foreach ($middleware as $class) {
+                $action = fn ($request) => $class($request, $response, $action);
+
+                if ($action instanceof Response) {
+                    break;
                 }
             }
 
-            $renderer = Renderer::createWithRequest($this->request);
-            $output = $renderer
-                ->withRouteParams(content: $content, data: $data)
-                ->render($routeFile) ?? '';
+            $response->withBody($action($request, $response));
+            $response->withBody($this->replacePerformanceMarkers($response->body()));
 
-            $output = $this->replacePerformanceMarkers($output);
-
-            return $output;
+            return $response->send();
         } catch (Throwable $e) {
             return $this->handleException($e);
         }

@@ -20,6 +20,7 @@ class Request
     public readonly array $query;
     public readonly string $body;
     public readonly array $headers;
+    public readonly array $middleware;
 
     private static ?Request $instance = null;
 

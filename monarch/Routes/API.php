@@ -73,6 +73,26 @@ class API
     }
 
     /**
+     * Specifies the routes should use the 'api' middleware group
+     * @param string $method
+     * @return string|array
+     */
+    public function middleware(string $method): string|array
+    {
+        return 'api';
+    }
+
+    public function __toString(): string
+    {
+        return json_encode([
+            'status' => $this->status,
+            'message' => $this->message,
+            'timestamp' => date("Y-m-d H:i:s"),
+            'data' => $this->body,
+        ]);
+    }
+
+    /**
      * Returns the status code for the response.
      *
      * @return static

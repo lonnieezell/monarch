@@ -1,8 +1,9 @@
 <?php
 
+use Kint\Kint;
 use Kint\Renderer\RichRenderer;
 use Monarch\View\Meta;
-use Myth\Config;
+use Monarch\Config;
 
 /**
  * Setup Kint

@@ -6,6 +6,7 @@ namespace Monarch\Routes;
 
 use Monarch\Config;
 use Monarch\HTTP\Request;
+use Monarch\View\Renderer;
 use RuntimeException;
 use SplFixedArray;
 
@@ -16,6 +17,9 @@ use SplFixedArray;
 class Router
 {
     public readonly string $basePath;
+    public readonly string $routeFile;
+    public readonly string $controlFile;
+    public readonly ?SplFixedArray $routeParams;
 
     /**
      * Creates a new Router instance with a base path set.
@@ -73,8 +77,8 @@ class Router
             [$routeFile, $controlFile] = $this->searchForFiles($this->basePath . $path .'/index.*');
         }
 
-        // Check for files with placeholders in the path
-        if ($routeFile === '' && strpos($path, '/') !== false) {
+        $hasPlaceholders = strpos($path, '[') !== false;
+        if ($routeFile === '' && $hasPlaceholders) {
             $segments = explode('/', $path);
             $pathRoute = '';
 
@@ -95,11 +99,49 @@ class Router
             }
         }
 
+        $this->routeFile = $routeFile;
+        $this->controlFile = $controlFile;
+        $this->routeParams = $this->getRouteParams($path, $searchPath ?? '', $routeFile);
+
         return [
-            $routeFile,
-            $controlFile,
-            $this->getRouteParams($path, $searchPath ?? '', $routeFile)
+            $this->routeFile,
+            $this->controlFile,
+            $this->routeParams,
         ];
+    }
+
+    /**
+     * Determines what to display based on the request,
+     * loads the control and route files, and renders the appropriate output.
+     *
+     * @throws RuntimeException
+     */
+    public function display(Request $request, string $routeFile = '', ?object $control = null, ?array $routeParams = null): string|array
+    {
+        // $this->setBasePath(ROOTPATH .'routes');
+        // [$routeFile, $controlFile, $routeParams] = $this->getFilesForRequest($request);
+
+        // Defaults
+        $content = 'index';
+        $data = [];
+
+        if ($control && method_exists($control, strtolower($request->method))) {
+            $output = $control->{strtolower($request->method)}(...($routeParams ?? []));
+
+            if (is_array($output)) {
+                $content = $output['content'] ?? $content;
+                $data = $output['data'] ?? $output;
+            } elseif (is_string($output)) {
+                $content = $output;
+            }
+        }
+
+        $renderer = Renderer::createWithRequest($request);
+        $output = $renderer
+            ->withRouteParams(content: $content, data: $data)
+            ->render($routeFile) ?? '';
+
+        return $output;
     }
 
     /**
@@ -159,6 +201,6 @@ class Router
             }
         }
 
-        return count($params) === 0 ? null : $params;
+        return count($params) === 0 ? null : SplFixedArray::fromArray($params);
     }
 }

@@ -53,6 +53,11 @@ $RECYCLE.BIN/
 vendor/
 
 #-------------------------
+# Temporary Build Files
+#-------------------------
+site/
+
+#-------------------------
 # IDE / Development Files
 #-------------------------
 
