@@ -1,9 +1,8 @@
 <?php
 
-namespace Tests\HTTP;
-
 use Monarch\HTTP\Middleware;
 use Monarch\HTTP\Request;
+
 
 beforeEach(function () {
     $this->request = Request::createFromArray([
@@ -35,7 +34,7 @@ describe('Middleware', function () {
 
     it('should return the default middleware if the control file does not return a middleware group name', function () {
         $control = new class () {
-            public function middleware(string $method): string|array
+            function middleware(string $method) : string|array
             {
                 return '';
             }
@@ -49,7 +48,7 @@ describe('Middleware', function () {
 
     it('should return the middleware for the given group name', function () {
         $control = new class () {
-            public function middleware(string $method): string|array
+            function middleware(string $method) : string|array
             {
                 return 'api';
             }

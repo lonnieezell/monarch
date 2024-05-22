@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Monarch\View;
 
+use Monarch\Components\ComponentManager;
+use Monarch\Components\TagParser;
 use Monarch\HTTP\Request;
 use RuntimeException;
 
@@ -29,24 +31,24 @@ trait HasLayouts
      * simply to determine the folder we're in so that we can recursively
      * build out layout from.
      */
-    protected function renderInLayout(string $content, string $routeFile): string
-    {
-        $layoutContent = $this->buildLayout($routeFile);
+    // protected function renderInLayout(string $content, string $routeFile): string
+    // {
+    //     $layoutContent = $this->buildLayout($routeFile);
 
-        if (empty($layoutContent)) {
-            return $content;
-        }
+    //     if (empty($layoutContent)) {
+    //         return $content;
+    //     }
 
-        // TODO: Allow for multiple named slots in the layout
-        return str_replace('<slot></slot>', $content, (string) $layoutContent);
-    }
+    //     // TODO: Allow for multiple named slots in the layout
+    //     return str_replace('<slot></slot>', $content, (string) $layoutContent);
+    // }
 
     /**
      * Crafts the layout for the page.
      *
      * @return string
      */
-    protected function buildLayout(string $routeFile): string
+    protected function renderLayout(string $routeFile): string
     {
         // Given the path in $routeFile, we need to find all layout files
         // for each directory in the path, up to ROOTPATH.

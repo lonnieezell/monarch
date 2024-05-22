@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Monarch\View\Renderers;
 
+use Monarch\Components\ComponentManager;
+use Monarch\Components\HasComponents;
+use Monarch\Components\TagParser;
 use Monarch\HTTP\Request;
 use Monarch\View\HasLayouts;
 use Monarch\View\RendererInterface;
@@ -12,6 +15,7 @@ use RuntimeException;
 class HTMLRenderer implements RendererInterface
 {
     use HasLayouts;
+    use HasComponents;
 
     private ?string $content = null;
     private array $data = [];
@@ -38,17 +42,22 @@ class HTMLRenderer implements RendererInterface
     public function render(string $routeFile): ?string
     {
         $hasRequest = $this->request instanceof Request;
-        $content = $this->renderHTMLFile($routeFile);
+        $contentHtml = $this->renderHTMLFile($routeFile);
+        $contentHtml = $this->parseComponents($contentHtml);
 
         if (! $hasRequest) {
-            return $content;
+            return $contentHtml;
         }
 
         if (! $this->needsLayout()) {
-            return $content;
+            return $contentHtml;
         }
 
-        return $this->renderInLayout($content, $routeFile);
+        $layoutHtml = $this->renderLayout($routeFile);
+        $layoutHtml = $this->parseComponents($layoutHtml);
+
+        // TODO: Allow for multiple named slots in the layout
+        return str_replace('<slot></slot>', $contentHtml, (string) $layoutHtml);
     }
 
     /**

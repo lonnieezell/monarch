@@ -17,8 +17,8 @@
 
 <body>
     <div class="main">
-        <nav hx-boost="true">
-            <ul class="nav justify-content-center bg-dark py-3">
+        <x-navbar>
+            <ul class="nav">
                 <li class="nav-item">
                     <a class="nav-link" href="/">Welcome</a>
                 </li>
@@ -35,7 +35,8 @@
                     <a class="nav-link" href="/error">Error</a>
                 </li>
             </ul>
-        </nav>
+        </x-navbar>
+
         <section class="bg-secondary-subtle py-5">
             <div class="container">
                 <slot></slot>

@@ -10,6 +10,7 @@ use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use League\CommonMark\Extension\FrontMatter\FrontMatterExtension;
 use League\CommonMark\Extension\FrontMatter\Output\RenderedContentWithFrontMatter;
 use League\CommonMark\MarkdownConverter;
+use Monarch\Components\HasComponents;
 use Monarch\HTTP\Request;
 use Monarch\View\HasLayouts;
 use Monarch\View\RendererInterface;
@@ -18,6 +19,7 @@ use RuntimeException;
 class MarkdownRenderer implements RendererInterface
 {
     use HasLayouts;
+    use HasComponents;
 
     private ?string $content = null;
     private array $data = [];
@@ -45,17 +47,20 @@ class MarkdownRenderer implements RendererInterface
     {
         $hasRequest = $this->request instanceof Request;
 
-        $content = $this->generateView($routeFile);
+        $contentHtml = $this->generateView($routeFile);
 
         if (! $hasRequest) {
-            return $content;
+            return $contentHtml;
         }
 
         if (! $this->needsLayout()) {
-            return $content;
+            return $contentHtml;
         }
 
-        return $this->renderInLayout($content, $routeFile);
+        $layoutHtml = $this->renderLayout($routeFile);
+        $layoutHtml = $this->parseComponents($layoutHtml);
+
+        return str_replace('<slot></slot>', $contentHtml, (string) $layoutHtml);
     }
 
     /**
