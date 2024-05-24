@@ -51,3 +51,7 @@ nav:
     - Routes: routes.md
     - Middleware: middleware.md
     - Views: views.md
+    - Components: view_components.md
+    - Database:
+        - Getting Started: database/connections.md
+        - Query Builder: database/query_builder.md

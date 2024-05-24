@@ -4,6 +4,7 @@ use Kint\Kint;
 use Kint\Renderer\RichRenderer;
 use Monarch\View\Meta;
 use Monarch\Config;
+use Monarch\Database\Connection;
 
 /**
  * Setup Kint
@@ -40,6 +41,23 @@ if (! function_exists('config')) {
     function config(string $key)
     {
         return Config::factory()->get($key);
+    }
+}
+
+/**
+ * Returns a new Connection instance.
+ * If no connection name is provided, the default connection
+ * will be used.
+ */
+if (! function_exists('db')) {
+    function db(?string $connectionName = null): Connection
+    {
+        if ($connectionName === null) {
+            $connectionName = config('database.default');
+        }
+
+        $config = config('database.' . $connectionName);
+        return Connection::createWithConfig($config);
     }
 }
 

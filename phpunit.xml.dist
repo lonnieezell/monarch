@@ -5,6 +5,7 @@
     bootstrap="vendor/autoload.php"
     colors="true"
     cacheDirectory=".build/phpunit/cache"
+    displayDetailsOnTestsThatTriggerWarnings="true"
 >
   <testsuites>
     <testsuite name="Test Suite">
@@ -17,4 +18,13 @@
       <directory suffix=".php">./src</directory>
     </include>
   </source>
+  <php>
+        <server name="ENVIRONMENT" value="testing"/>
+        <server name="DB_DRIVER" value="sqlite"/>
+        <server name="DB_DATABASE" value=":memory:"/>
+        <!-- <server name="DB_HOST" value=""/>
+        <server name="DB_PORT" value=""/>
+        <server name="DB_USER" value=""/>
+        <server name="DB_PASSWORD" value=""/> -->
+    </php>
 </phpunit>

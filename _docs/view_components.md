@@ -8,7 +8,7 @@ There are two types of components: simple components and controlled components. 
 
 ## Creating Components
 
-All components must be located within the `app/Components` directory. This directory is auto-loaded by the framework, so you can reference components by their class name without needing to import them. You can add additional directories to search for components in by adding it to the `componentPaths` array in the `config/app.php` file.
+All components should be located within the `app/Components` directory. This directory is auto-loaded by the framework, so you can reference components by their class name without needing to import them. You can add additional directories to search for components in by adding it to the `componentPaths` array in the `config/app.php` file.
 
 ```php
 return [
@@ -116,7 +116,7 @@ Since the component file is just a PHP file, you can use PHP to generate dynamic
 </button>
 ```
 
-## Slots
+### Slots
 
 As we've seen, slots are a way to pass content into a component. They are placeholders that can be replaced with content when the component is used. Slots are defined using the `x-slot` tag in the component file and are replaced with the content inside the component tag.
 
@@ -135,7 +135,7 @@ You can then use the component like this:
 </x-alert>
 ```
 
-### Default Slot Content
+#### Default Slot Content
 
 You can provide default content for a slot by using the `x-slot` tag with a default value.
 
@@ -156,7 +156,7 @@ You can then use the component like this:
 
 The default content will be used if no content is provided.
 
-### Named Slots
+#### Named Slots
 
 You can define multiple slots in a component by using the `name` attribute on the `x-slot` tag.
 
