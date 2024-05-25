@@ -57,6 +57,7 @@ if (! function_exists('db')) {
         }
 
         $config = config('database.' . $connectionName);
+
         return Connection::createWithConfig($config);
     }
 }

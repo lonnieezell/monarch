@@ -9,7 +9,6 @@ use Monarch\HTTP\Middleware;
 use Monarch\HTTP\Request;
 use Monarch\HTTP\Response;
 use Monarch\Routes\Router;
-use Monarch\View\Renderer;
 use Throwable;
 
 class App

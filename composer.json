@@ -18,6 +18,7 @@
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.49",
         "kint-php/kint": "^3.3",
+        "mockery/mockery": "^1.6",
         "pestphp/pest": "^2.34",
         "pestphp/pest-plugin-drift": "^2.5",
         "php-parallel-lint/php-console-highlighter": "^1.0",

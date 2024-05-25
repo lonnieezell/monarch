@@ -32,7 +32,20 @@ class Connection
         $fingerprint = md5(serialize($config));
 
         if (!isset(self::$instances[$fingerprint])) {
-            self::$instances[$fingerprint] = new static($config);
+            $driver = $config['driver'] ?? null;
+
+            if ($driver === null) {
+                throw new RuntimeException('Database driver is required');
+            }
+
+            $className = match ($driver) {
+                'sqlite' => SQLiteConnection::class,
+                'mysql' => MySQLConnection::class,
+                'postgres' => PostgreSQLConnection::class,
+                default => throw new RuntimeException('Unsupported database driver: ' . $driver),
+            };
+
+            self::$instances[$fingerprint] = new $className();
             self::$instances[$fingerprint]->withConfig($config);
         }
 
@@ -45,41 +58,13 @@ class Connection
     }
 
     /**
-     * Set the configuration for the database connection.
+     * Connects to the database using the provided configuration.
+     *
+     * @throws PDOException
      */
-    public function withConfig(array $config): static
+    public function withConfig(array $config): void
     {
         $this->config = $config;
-
-        return $this;
-    }
-
-    /**
-     * Establish a database connection and return the connection object.
-     */
-    public function connect(?array $options = null): PDO
-    {
-        // Based on the connection type, we will create the appropriate connection object.
-        $dsn = match ($this->config['driver']) {
-            'sqlite' => $this->buildDSN('sqlite'),
-            'mysql' => $this->buildDSN('mysql'),
-            'postgres' => $this->buildDSN('pgsql'),
-            default => throw new RuntimeException('Unsupported database driver: ' . $this->config['driver']),
-        };
-
-        if (empty($options)) {
-            $options = [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
-            ];
-        }
-
-        $this->pdo = $this->config['driver'] === 'sqlite'
-            ? new PDO($dsn, null, null, $options)
-            : new PDO($dsn, $this->config['user'], $this->config['password'], $options);
-
-        return $this->pdo;
     }
 
     /**
@@ -114,7 +99,11 @@ class Connection
         }
 
         $statement = $this->pdo->prepare($sql);
-        return $statement->execute($params);
+        if (! $statement->execute($params)) {
+            throw new PDOException('Failed to execute query');
+        }
+
+        return $statement;
     }
 
     /**
