@@ -1,0 +1,21 @@
+<?php
+
+// Hook up Composer
+
+use Monarch\Console\Console;
+
+include_once './vendor/autoload.php';
+
+// constants
+define('START_TIME', microtime(true));
+define('ENVIRONMENT', getenv('ENVIRONMENT') ?: 'development');
+define('ROOTPATH', realpath('.') .'/');
+define('APPPATH', realpath(ROOTPATH.'app') .'/');
+define('MONARCHPATH', realpath(ROOTPATH .'monarch') .'/');
+define('TESTPATH', realpath(ROOTPATH.'tests') .'/');
+
+$console = new Console();
+
+$console->registerPath(APPPATH .'Commands/');
+$console->registerPath(MONARCHPATH .'Commands/');
+$console->run();
