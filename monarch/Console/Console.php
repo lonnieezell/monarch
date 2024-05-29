@@ -45,20 +45,26 @@ class Console
 
         $this->discoverCommands();
 
-        $commandName = $argv[1] ?? null;
+        $commandName = strtolower($argv[1]) ?? null;
         $arguments = array_slice($argv, 2);
 
         // Default to List command
         if (! isset($commandName)) {
             $commandName = 'list-commands';
-            $arguments = ['commands' => $this->commands];
         }
 
         if (! isset($this->commands[$commandName])) {
             throw new RuntimeException('Unable to locate desired command.');
         }
 
-        $this->commands[$commandName]->run($arguments);
+        $command = $this->commands[$commandName];
+        $command->parseArguments($arguments);
+
+        if ($commandName == 'list-commands') {
+            $command->setCommands($this->commands);
+        }
+
+        $this->commands[$commandName]->run();
     }
 
     /**

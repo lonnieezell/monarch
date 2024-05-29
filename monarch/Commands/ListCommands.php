@@ -4,13 +4,10 @@ use Monarch\Console\Command;
 
 class ListCommands extends Command
 {
-    protected string $name = 'list-commands';
-
+    protected string $signature = 'list-commands';
     protected string $description = 'Lists all commands found';
-
-    protected string $group = 'Monarch';
-
-
+    protected string $group = 'General';
+    protected array $commands = [];
 
     /**
      * Run the command. This is the primary entry-point to
@@ -18,16 +15,14 @@ class ListCommands extends Command
      *
      * @return int The exit code for this command.
      */
-    public function run(array $arguments): void
+    public function run(): void
     {
-        $commands = $arguments['commands'];
-
         $this->header('Available Commands:');
         $this->newline();
 
         // Organize the commands alphabetically, within their groups
         $sortedCommands = [];
-        foreach ($commands as $command) {
+        foreach ($this->commands as $command) {
             if (! isset($sortedCommands[$command->group()])) {
                 $sortedCommands[$command->group()] = [];
             }
@@ -52,5 +47,13 @@ class ListCommands extends Command
                 $this->line("   {$command->name()} - {$command->description()}", 'success');
             }
         }
+    }
+
+    /**
+     * Sets the commands to list.
+     */
+    public function setCommands(array $commands): void
+    {
+        $this->commands = $commands;
     }
 }

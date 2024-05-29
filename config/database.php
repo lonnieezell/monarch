@@ -2,11 +2,11 @@
 
 return [
     // The default database connection group to use
-    'default' => 'sqlite',
+    'default' => env('DB_DRIVER', 'sqlite'),
 
     'sqlite' => [
         'driver' => env('DB_DRIVER', 'sqlite'),
-        'database' => env('DB_DATABASE', 'app'),
+        'database' => env('DB_DATABASE', WRITEPATH .'db.sq3'),
     ],
 
     'mysql' => [
