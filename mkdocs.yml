@@ -55,3 +55,6 @@ nav:
     - Database:
         - Getting Started: database/connections.md
         - Query Builder: database/query_builder.md
+    - Helpers:
+        - Files: files.md
+        - Strings: str.md

@@ -34,6 +34,9 @@ uses(TestCase::class)
         if (! defined('TESTPATH')) {
             define('TESTPATH', realpath(ROOTPATH.'tests') .'/');
         }
+        if (! defined('WRITEPATH')) {
+            define('WRITEPATH', realpath(ROOTPATH.'writable') .'/');
+        }
 
 
         $app = App::createFromGlobals();
