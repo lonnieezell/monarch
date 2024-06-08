@@ -1,60 +1,61 @@
+<?php
+viewMeta()->addStyle(["rel" => "stylesheet", "href" => "https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.min.css"]);
+viewMeta()->addScript(['src' => 'https://unpkg.com/htmx.org@1.9.12', 'integrity' => 'sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2', 'crossorigin' => 'anonymous']);
+?>
 <!doctype html>
-<html class="no-js" lang="en-US" data-bs-theme="dark">
-
+<html lang="en-US">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark"/>
     <title><?= viewMeta()->title() ?></title>
 
     <?= viewMeta()->output('meta') ?>
 
-    <link href="/css/vendor/bootstrap-5.3.min.css" rel="stylesheet">
     <?= viewMeta()->output('styles') ?>
-    <script src="/js/vendor/htmx-1.9.11.min.js"></script>
     <?= viewMeta()->output('scripts') ?>
     <?= viewMeta()->output('rawScripts') ?>
 </head>
 
 <body>
-    <div class="main">
-        <x-navbar>
-            <ul class="nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="/">Welcome</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/about">About</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/markdown">Markdown</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/api">API</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/error">Error</a>
-                </li>
-            </ul>
-        </x-navbar>
-
-        <section class="bg-secondary-subtle py-5">
-            <div class="container">
-                <slot></slot>
-            </div>
-        </section>
-        <footer>
-            <div class="text-center pt-5">
-                <img src="/img/logo.png" alt="Monarch logo" class="mx-auto" style="max-width: 100px;">
-            </div>
-            <p class="text-center pt-2">Monarch is an experiment by <a href="https://github.com/lonnieezell" target="_blank">Lonnie Ezell</a></p>
-            <p class="text-center pt-2 pb-5 opacity-50">
-                Crafted by a kaleidoscope of digital butterflies in <strong>{elapsed_time}</strong> using <strong>{memory_usage}</strong> of memory.
-            </p>
-        </footer>
+<header>
+    <x-navbar>
+        <ul>
+            <li>
+                <a href="/">Welcome</a>
+            </li>
+            <li>
+                <a href="/about">About</a>
+            </li>
+            <li>
+                <a href="/markdown">Markdown</a>
+            </li>
+            <li>
+                <a href="/api">API</a>
+            </li>
+            <li>
+                <a href="/error">Error</a>
+            </li>
+        </ul>
+    </x-navbar>
+</header>
+<main>
+    <section>
+        <slot></slot>
+    </section>
+</main>
+<footer>
+    <div>
+        <img src="/img/logo.png" alt="Monarch logo" style="max-width: 100px;">
     </div>
+    <p>Monarch is an experiment by <a href="https://github.com/lonnieezell"
+                                      target="_blank">Lonnie Ezell</a></p>
+    <p>
+        Crafted by a kaleidoscope of digital butterflies in <strong>{elapsed_time}</strong> using
+        <strong>{memory_usage}</strong>
+        of memory.
+    </p>
+</footer>
 
-
-    <script src="js/app.js"></script>
+<script src="js/app.js"></script>
 </body>
 
 </html>

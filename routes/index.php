@@ -7,8 +7,6 @@
 ?>
 
 <x-hero>
-    <h1 class="display-5 fw-bold text-body-emphasis">Welcome to Monarch</h1>
-    <div class="col-lg-6 mx-auto">
-    <p class="lead mb-4">Monarch is an opinionated framework for building the web.</p>
-    </div>
+    <h1>Welcome to Monarch</h1>
+    <p>Monarch is an opinionated framework for building the web.</p>
 </x-hero>

@@ -13,7 +13,6 @@
 <ul>
     <li>PHP 8</li>
     <li>HTMX</li>
-    <li>Bootstrap 5</li>
     <li>Composer</li>
     <li>Pest</li>
 </ul>
