@@ -49,16 +49,15 @@ class App
             // Get the control file, if exists
             $router = new Router();
             $router->setBasePath(ROOTPATH .'routes');
-            [$routeFile, $controlFile, $routeParams] = $router->getFilesForRequest($this->request);
+            $route = $router->getRouteForRequest($this->request);
 
             /** @var object */
-            $control = $controlFile !== '' ? include $controlFile : null;
+            $control = $route->controlFile !== '' ? include $route->controlFile : null;
 
             $action = fn (Request $request, Response $response) => $router->display(
                 request: $request,
-                routeFile: $routeFile,
                 control: $control,
-                routeParams: $routeParams
+                route: $route
             );
 
             // Run the middleware

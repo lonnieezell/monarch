@@ -25,11 +25,11 @@ describe('router', function () {
 
         $router = Router::createWithBasePath(TESTPATH .'_support/routes');
 
-        [$routeFile, $controlFile, $params] = $router->getFilesForRequest($request);
+        $route = $router->getRouteForRequest($request);
 
-        expect($routeFile)->toBe(TESTPATH . '_support/routes/foo/bar.php');
-        expect($controlFile)->toBe(TESTPATH . '_support/routes/foo/bar.control.php');
-        expect($params)->toBeNull();
+        expect($route->routeFile)->toBe(TESTPATH . '_support/routes/foo/bar.php');
+        expect($route->controlFile)->toBe(TESTPATH . '_support/routes/foo/bar.control.php');
+        expect($route->params)->toBeNull();
     });
 
     test('can get dynamic files for request', function () {
@@ -47,10 +47,10 @@ describe('router', function () {
 
         $router = Router::createWithBasePath(TESTPATH .'_support/routes');
 
-        [$routeFile, $controlFile, $params] = $router->getFilesForRequest($request);
+        $route = $router->getRouteForRequest($request);
 
-        expect($routeFile)->toBe(TESTPATH . '_support/routes/posts[year][month].php');
-        expect($controlFile)->toBe(TESTPATH . '_support/routes/posts[year][month].control.php');
-        expect($params)->toBe(['year' => '2024', 'month' => '12']);
+        expect($route->routeFile)->toBe(TESTPATH . '_support/routes/posts[year][month].php');
+        expect($route->controlFile)->toBe(TESTPATH . '_support/routes/posts[year][month].control.php');
+        expect($route->params)->toBe(['year' => '2024', 'month' => '12']);
     });
 });

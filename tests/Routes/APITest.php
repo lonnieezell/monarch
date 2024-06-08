@@ -19,6 +19,6 @@ describe('api', function () {
 
         $router = Router::createWithBasePath(TESTPATH . '_support/routes');
 
-        [$routeFile, $controlFile, $params] = $router->getFilesForRequest($request);
+        $route = $router->getRouteForRequest($request);
     });
 });

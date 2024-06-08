@@ -57,9 +57,9 @@ class Router
      * Example:
      *  $router = new Router();
      *  $router->setBasePath(ROOTPATH .'routes');
-     *  [$routeFile, $controlFile] = $router->getFilesForRequest($request);
+     *  $route = $router->getFilesForRequest($request);
      */
-    public function getFilesForRequest(Request $request): array
+    public function getRouteForRequest(Request $request): Route
     {
         $path = ltrim($request->path ?: 'index', '/');
         $path = strtolower($path);
@@ -101,13 +101,13 @@ class Router
 
         $this->routeFile = $routeFile;
         $this->controlFile = $controlFile;
-        $this->routeParams = $this->getRouteParams($path, $searchPath ?? '', $routeFile);
+        $this->routeParams = $this->getRouteParams($path, $searchPath ?? '');
 
-        return [
-            $this->routeFile,
-            $this->controlFile,
-            $this->routeParams,
-        ];
+        return new Route(
+            routeFile: $this->routeFile,
+            controlFile: $this->controlFile,
+            params: $this->routeParams,
+        );
     }
 
     /**
@@ -116,11 +116,8 @@ class Router
      *
      * @throws RuntimeException
      */
-    public function display(Request $request, string $routeFile = '', ?object $control = null, ?array $routeParams = null): string|array
+    public function display(Request $request, Route $route, ?object $control = null): string|array
     {
-        // $this->setBasePath(ROOTPATH .'routes');
-        // [$routeFile, $controlFile, $routeParams] = $this->getFilesForRequest($request);
-
         // Defaults
         $content = 'index';
         $data = [];
@@ -139,7 +136,7 @@ class Router
         $renderer = Renderer::createWithRequest($request);
         $output = $renderer
             ->withRouteParams(content: $content, data: $data)
-            ->render($routeFile) ?? '';
+            ->render($route->routeFile) ?? '';
 
         return $output;
     }
@@ -177,7 +174,7 @@ class Router
      * Given a path and a search path, will attempt to extract any route
      * parameters from the path.
      */
-    private function getRouteParams(string $path, string $searchPath, string $routeFile): ?array
+    private function getRouteParams(string $path, string $searchPath): ?array
     {
         $params = [];
 
@@ -192,7 +189,7 @@ class Router
 
         $pathParts = explode('/', $path);
         $searchParts = explode('[', $searchPath);
-        $routeParts = explode('[', $routeFile);
+        $routeParts = explode('[', $this->routeFile);
 
         foreach ($searchParts as $index => $part) {
             if ($part === '*]') {

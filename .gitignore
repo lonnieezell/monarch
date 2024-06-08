@@ -11,6 +11,11 @@ phpunit.xml
 .env.backup
 
 #-------------------------
+# Writable Folder
+#-------------------------
+Writable/
+
+#-------------------------
 # Temporary Files
 #-------------------------
 .build/
