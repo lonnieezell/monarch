@@ -51,6 +51,11 @@ class Str
      */
     public static function slug(string $string, string $divider = '-'): string
     {
+        // Handle camelCase strings
+        if (strpos($string, '_') === false && strpos($string, '-') === false) {
+            $string = preg_replace('/([a-z])([A-Z])/', '$1' . $divider . '$2', $string);
+        }
+
         // replace non letter or digits by divider
         $string = preg_replace('~[^\pL\d]+~u', $divider, $string);
 
@@ -67,7 +72,7 @@ class Str
         $string = preg_replace('~-+~', $divider, $string);
 
         // lowercase
-        $string = strtolower($string);
+        $string = mb_strtolower($string);
 
         if (empty($string)) {
             return 'n-a';
@@ -135,7 +140,7 @@ class Str
     {
         $words = explode(' ', $string);
 
-        if (count($words) <= $words) {
+        if (count($words) <= $wordLimit) {
             return $string;
         }
 

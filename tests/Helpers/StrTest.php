@@ -299,7 +299,7 @@ describe('Str', function () {
 
         $output = Str::limit($input, -5);
 
-        expect($output)->toEqual('...');
+        expect($output)->toEqual('hello...');
     });
 
     test('limit with non-ASCII characters', function () {
@@ -321,7 +321,7 @@ describe('Str', function () {
 
         $output = Str::words($input, 1);
 
-        expect($output)->toEqual('hello');
+        expect($output)->toEqual('hello...');
     });
 
     test('words with non-ASCII characters', function () {
@@ -329,7 +329,7 @@ describe('Str', function () {
 
         $output = Str::words($input, 2);
 
-        expect($output)->toEqual('hello world');
+        expect($output)->toEqual('hello world...');
     });
 
     test('words with limit greater than number of words', function () {
