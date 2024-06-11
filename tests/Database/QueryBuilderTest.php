@@ -1,6 +1,6 @@
 <?php
 
-use Monarch\Database\QueryBuilder;
+use Monarch\Database\Extensions\QueryBuilder;
 
 describe('QueryBuilder', function () {
     it('should concatenate SQL lines', function () {

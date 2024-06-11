@@ -1,11 +1,53 @@
 <?php
 
-namespace Monarch\Database;
+namespace Monarch\Database\Extensions;
 
-class QueryBuilder
+use BadMethodCallException;
+use Monarch\Database\Connection;
+use Monarch\Database\ExtensionInterface;
+
+class QueryBuilder implements ExtensionInterface
 {
     private array $lines = [];
     private array $bindings = [];
+    private Connection $connection;
+    private array $extensions = [];
+    private static ?QueryBuilder $instance = null;
+
+    /**
+     * Returns a singleton instance of the QueryBuilder.
+     */
+    public static function instance(): QueryBuilder
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+
+        return self::$instance;
+    }
+
+    /**
+     * Register our extension with the connection.
+     */
+    public static function extend(Connection $connection): void
+    {
+        $connection->register('sql', function ($sql, $bindings = null) use ($connection) {
+            return QueryBuilder::instance()
+                ->withConnection($connection)
+                ->sql($sql, $bindings);
+        });
+        $connection->register('queryBuilder', fn () => QueryBuilder::instance());
+    }
+
+    /**
+     * Sets the connection for the QueryBuilder.
+     */
+    public function withConnection(Connection $connection): self
+    {
+        $this->connection = $connection;
+
+        return $this;
+    }
 
     /**
      * The starting point for a new query when using the QueryBuilder.
@@ -115,11 +157,43 @@ class QueryBuilder
     }
 
     /**
+     * Returns the query string with the bindings replaced.
+     * @return string
+     */
+    public function toString(): string
+    {
+        $sql = $this->toSql();
+        $bindings = $this->bindings();
+
+        foreach ($bindings as $key => $value) {
+            $sql = is_string($key)
+                ? preg_replace("/:{$key}/", "'$value'", $sql, 1)
+                : preg_replace('/\?/', "'$value'", $sql, 1);
+        }
+
+        return $sql;
+    }
+
+    /**
      * Resets the query builder.
      */
     public function reset(): void
     {
         $this->lines = [];
         $this->bindings = [];
+    }
+
+    /**
+     * If the method doesn't exist, then check the extensions registered.
+     * If still not found, return control back to the connection.
+     */
+    public function __call($method, $args)
+    {
+        if (isset($this->extensions[$method])) {
+            return $this->extensions[$method](...$args);
+        }
+
+        // Return control back to the connection
+        return $this->connection->$method(...$args);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+use Monarch\Database\Extensions\QueryBuilder;
+
 return [
     // The default database connection group to use
     'default' => env('DB_DRIVER', 'sqlite'),
@@ -33,5 +35,29 @@ return [
     'test' => [
         'driver' => env('DB_DRIVER', 'sqlite'),
         'database' => env('DB_DATABASE', ':memory:'),
+    ],
+
+    /**
+     * Extensions provide additional functionality to the database,
+     * such as QueryBuilder support.
+     *
+     * You can provide an array of classes to provide additional functionality
+     * to the database connection object. When a method is not found on the
+     * connection class itself, we will check the extensions for the method.
+     * Once the method has been processed, the connection object will be returned
+     * so that methods may continue to be chained.
+     */
+    'extensions' => [
+        QueryBuilder::class,
+    ],
+
+    /**
+     * QueryBuilder Extensions provide additional functionality to the QueryBuilder
+     * object. You can provide an array of classes to provide additional functionality
+     * to the QueryBuilder object. When a method is not found on the QueryBuilder class
+     * itself, we will check the extensions for the method.
+     */
+    'queryBuilderExtensions' => [
+        //
     ],
 ];

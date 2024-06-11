@@ -1,11 +1,14 @@
 <?php
 
-namespace Monarch\Database;
+namespace Monarch\Database\Drivers;
 
+use DateTimeInterface;
+use Monarch\Database\Connection;
+use Monarch\Database\DriverInterface;
 use PDO;
 use PDOException;
 
-class PostgreSQLConnection extends Connection implements DatabaseInterface
+class PostgreSQLDriver extends Connection implements DriverInterface
 {
     /**
      * Connect to the database.
@@ -59,6 +62,14 @@ class PostgreSQLConnection extends Connection implements DatabaseInterface
     }
 
     /**
+     * Returns the correct date/time format for the database.
+     */
+    public function formatDateTime(DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
+
+    /**
      * Checks if a table exists in the database.
      *
      * Example:
@@ -86,8 +97,27 @@ class PostgreSQLConnection extends Connection implements DatabaseInterface
     {
         $this->ensureConnection();
 
-        $query = $this->run("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema'");
-        return $query->fetchAll(PDO::FETCH_COLUMN) ?? [];
+        $query = $this->run("SELECT DISTINCT ON (c.relname)
+				c.relname::varchar AS name,
+				c.relkind IN ('v', 'm') AS view,
+				n.nspname::varchar || '.' || c.relname::varchar AS \"fullName\"
+			FROM
+				pg_catalog.pg_class AS c
+				JOIN pg_catalog.pg_namespace AS n ON n.oid = c.relnamespace
+			WHERE
+				c.relkind IN ('r', 'v', 'm', 'p')
+				AND n.nspname = ANY (pg_catalog.current_schemas(FALSE))
+			ORDER BY
+				c.relname");
+        $rows = $query->fetchAll(PDO::FETCH_COLUMN) ?? [];
+
+        $tables = [];
+
+        foreach ($rows as $row) {
+            $tables[] = (array) $row;
+        }
+
+        return $tables;
     }
 
     /**
@@ -176,63 +206,41 @@ class PostgreSQLConnection extends Connection implements DatabaseInterface
     }
 
     /**
-     * Add a column to a table.
+     * Get a list of all indexes in a table.
      *
      * Example:
-     * db()->addColumn('users', 'email', 'varchar(255)');
+     * $indexes = db()->indexes('users');
      *
-     * @throws PDOException
+     * returns: [
+     *    [
+     *      'name' => 'PRIMARY',
+     *      'unique' => true,
+     *      'primary' => true,
+     *      'columns' => ['id']
+     *   ],
+     * ];
      */
-    public function addColumn(string $table, string $column, string $type): void
+    public function indexes(string $table): array
     {
         $this->ensureConnection();
 
-        $this->run("ALTER TABLE $table ADD COLUMN $column $type");
-    }
+        $query = $this->run("SELECT indexname, indisunique, indisprimary, indkey FROM pg_indexes WHERE tablename = ?", [$table]);
+        $rows = $query->fetchAll(PDO::FETCH_ASSOC) ?? [];
 
-    /**
-     * Drop a column from a table.
-     *
-     * Example:
-     * db()->dropColumn('users', 'email');
-     *
-     * @throws PDOException
-     */
-    public function dropColumn(string $table, string $column): void
-    {
-        $this->ensureConnection();
+        $indexes = [];
 
-        $this->run("ALTER TABLE $table DROP COLUMN $column");
-    }
+        foreach ($rows as $row) {
+            $columns = $this->run("SELECT attname FROM pg_attribute WHERE attrelid = ? AND attnum = ANY (?)", [$table, $row['indkey']])->fetchAll(PDO::FETCH_COLUMN) ?? [];
 
-    /**
-     * Add an index to a table.
-     *
-     * Example:
-     * db()->addIndex('users', 'email');
-     *
-     * @throws PDOException
-     */
-    public function addIndex(string $table, string $column): void
-    {
-        $this->ensureConnection();
+            $indexes[] = [
+                'name' => $row['indexname'],
+                'unique' => $row['indisunique'],
+                'primary' => $row['indisprimary'],
+                'columns' => $columns,
+            ];
+        }
 
-        $this->run("CREATE INDEX ON $table ($column)");
-    }
-
-    /**
-     * Drop an index from a table.
-     *
-     * Example:
-     * db()->dropIndex('users', 'email');
-     *
-     * @throws PDOException
-     */
-    public function dropIndex(string $table, string $column): void
-    {
-        $this->ensureConnection();
-
-        $this->run("DROP INDEX ON $table ($column)");
+        return $indexes;
     }
 
     /**
@@ -252,33 +260,41 @@ class PostgreSQLConnection extends Connection implements DatabaseInterface
     }
 
     /**
-     * Add a foreign key to a table.
+     * Get a list of all foreign keys in a table.
      *
      * Example:
-     * db()->addForeignKey('users', 'role_id', 'roles', 'id');
+     * $foreignKeys = db()->foreignKeys('users');
      *
-     * @throws PDOException
+     * returns: [
+     *   [
+     *      'name' => 'users_role_id_foreign',
+     *      'local' => 'role_id',
+     *      'table' => 'roles',
+     *      'foreign' => 'id',
+     *  ],
+     * ];
      */
-    public function addForeignKey(string $table, string $column, string $foreignTable, string $foreignColumn): void
+    public function foreignKeys(string $table): array
     {
         $this->ensureConnection();
 
-        $this->run("ALTER TABLE $table ADD CONSTRAINT fk_{$table}_{$column} FOREIGN KEY ($column) REFERENCES $foreignTable($foreignColumn)");
-    }
+        $query = $this->run("SELECT conname, attname, confrelid::regclass, conkey FROM pg_constraint JOIN pg_attribute ON attrelid = conrelid WHERE conrelid = ?", [$table]);
+        $rows = $query->fetchAll(PDO::FETCH_ASSOC) ?? [];
 
-    /**
-     * Drop a foreign key from a table.
-     *
-     * Example:
-     * db()->dropForeignKey('users', 'role_id');
-     *
-     * @throws PDOException
-     */
-    public function dropForeignKey(string $table, string $column): void
-    {
-        $this->ensureConnection();
+        $foreignKeys = [];
 
-        $this->run("ALTER TABLE $table DROP CONSTRAINT fk_{$table}_{$column}");
+        foreach ($rows as $row) {
+            $columns = $this->run("SELECT attname FROM pg_attribute WHERE attrelid = ? AND attnum = ANY (?)", [$table, $row['conkey']])->fetchAll(PDO::FETCH_COLUMN) ?? [];
+
+            $foreignKeys[] = [
+                'name' => $row['conname'],
+                'local' => $row['attname'],
+                'table' => $row['confrelid'],
+                'foreign' => $columns[0],
+            ];
+        }
+
+        return $foreignKeys;
     }
 
     /**

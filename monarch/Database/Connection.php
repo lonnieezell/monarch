@@ -2,9 +2,14 @@
 
 namespace Monarch\Database;
 
+use Monarch\Database\Drivers\MySQLDriver;
+use Monarch\Database\Drivers\PostgreSQLDriver;
+use Monarch\Database\Drivers\SQLiteDriver;
+use Monarch\Database\Extensions\QueryBuilder;
 use PDO;
 use PDOException;
 use PDOStatement;
+use ReflectionClass;
 use RuntimeException;
 
 /**
@@ -21,7 +26,7 @@ class Connection
     public ?PDO $pdo;
     protected static array $instances = [];
     protected array $config = [];
-    private QueryBuilder $queryBuilder;
+    private array $extensions = [];
 
     /**
      * Creates a new singleton instance of the database connection.
@@ -39,22 +44,18 @@ class Connection
             }
 
             $className = match ($driver) {
-                'sqlite' => SQLiteConnection::class,
-                'mysql' => MySQLConnection::class,
-                'postgres' => PostgreSQLConnection::class,
+                'sqlite' => SQLiteDriver::class,
+                'mysql' => MySQLDriver::class,
+                'postgres' => PostgreSQLDriver::class,
                 default => throw new RuntimeException('Unsupported database driver: ' . $driver),
             };
 
             self::$instances[$fingerprint] = new $className();
             self::$instances[$fingerprint]->withConfig($config);
+            self::$instances[$fingerprint]->loadExtensions(config('database.extensions') ?? []);
         }
 
         return self::$instances[$fingerprint];
-    }
-
-    public function __construct()
-    {
-        $this->queryBuilder = new QueryBuilder();
     }
 
     /**
@@ -65,6 +66,47 @@ class Connection
     public function withConfig(array $config): void
     {
         $this->config = $config;
+    }
+
+    /**
+     * Creates instances of all the extensions provided in the configuration.
+     */
+    public function loadExtensions(array $extensions): void
+    {
+        foreach ($extensions as $className) {
+            if (! class_exists($className)) {
+                throw new RuntimeException('Extension not found: ' . $className);
+            }
+
+            if (isset($this->extensions[$className])) {
+                throw new RuntimeException('Extension already loaded: ' . $className);
+            }
+
+            $class = new ReflectionClass($className);
+
+            if (! $class->implementsInterface(ExtensionInterface::class)) {
+                throw new RuntimeException('Extension must implement ExtensionInterface: ' . $className);
+            }
+
+            /** @var $class ExtensionInterface */
+            $className::extend($this);
+        }
+    }
+
+    /**
+     * Returns the registered extensions.
+     */
+    public function extensions(): array
+    {
+        return $this->extensions;
+    }
+
+    /**
+     * Registers a new extension with the connection.
+     */
+    public function register(string $name, callable $callback): void
+    {
+        $this->extensions[$name] = $callback;
     }
 
     /**
@@ -89,9 +131,16 @@ class Connection
         }
 
         if (empty($sql)) {
-            $sql = $this->queryBuilder->toSql();
-            $params = $this->queryBuilder->bindings();
-            $this->queryBuilder->reset();
+            if (isset($this->extensions['queryBuilder'])) {
+                $builder = $this->extensions['queryBuilder']();
+                $sql = $builder->toSql();
+                $params = $builder->bindings();
+                $builder->reset();
+            }
+        }
+
+        if (empty($sql)) {
+            throw new RuntimeException('No query provided');
         }
 
         if ($params === null || $params === []) {
@@ -121,63 +170,20 @@ class Connection
      */
     private function ensureConnection(): void
     {
-        if (!isset($this->pdo)) {
-            $this->connect();
-        }
-    }
-
-    /**
-     * Builds the DSN for the PDO connection.
-     *
-     * @throws RuntimeException
-     */
-    private function buildDSN(string $driver): string
-    {
-        if (empty($this->config['database'])) {
-            throw new RuntimeException('Database name is required');
+        if (isset($this->pdo)) {
+            return;
         }
 
-        // SQLite
-        if ($driver === 'sqlite') {
-            return sprintf('sqlite:%s', $this->config['database']);
-        }
-
-        if (empty($this->config['charset'])) {
-            throw new RuntimeException('Charset is required');
-        }
-
-        // MySQL
-        if ($driver === 'mysql') {
-            return sprintf(
-                '%s:host=%s;port=%s;dbname=%s;charset=%s',
-                $driver,
-                $this->config['host'] ?? 'localhost',
-                $this->config['port'] ?? 3306,
-                $this->config['database'],
-                $this->config['charset'],
-            );
-        }
-
-        // PostgreSQL
-        return sprintf(
-            '%s:host=%s;port=%s;dbname=%s;sslmode=%s',
-            $driver,
-            $this->config['host'] ?? 'localhost',
-            $this->config['port'] ?? 3306,
-            $this->config['database'],
-            $this->config['sslmode'],
-        );
+        $this->connect();
     }
 
     /**
      * Magic method to allow for chaining of methods on the QueryBuilder object.
      */
-    public function __call($name, $arguments): static
+    public function __call($name, $arguments)
     {
-        if (method_exists($this->queryBuilder, $name)) {
-            $this->queryBuilder->$name(...$arguments);
+        if (isset($this->extensions[$name])) {
+            return $this->extensions[$name](...$arguments);
         }
-
-        return $this;
     }
 }

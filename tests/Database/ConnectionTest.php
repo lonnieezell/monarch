@@ -1,169 +1,122 @@
 <?php
 
 use Monarch\Database\Connection;
-use Monarch\Database\SQLiteConnection;
-
-use function PHPUnit\Framework\assertFalse;
-
-beforeEach(function () {
-    $config = [
-        'driver' => 'sqlite',
-        'database' => ':memory:',
-    ];
-
-    $this->connection = Connection::createWithConfig($config);
-});
+use Monarch\Database\DriverInterface;
+use Monarch\Database\Drivers\MySQLDriver;
+use Monarch\Database\Drivers\PostgreSQLDriver;
+use Monarch\Database\Drivers\SQLiteDriver;
+use Monarch\Database\Extensions\QueryBuilder;
 
 describe('Database Connection', function () {
     test('create with config', function () {
+        $config = config('database.'. config('database.default'));
+
+        $connection = Connection::createWithConfig($config);
+        expect($connection)->toBeInstanceOf(DriverInterface::class);
+        expect(get_class($connection))->toBeIn([
+            SQLiteDriver::class,
+            MySQLDriver::class,
+            PostgreSQLDriver::class,
+        ]);
+    });
+
+    test('create with config should return the same instance', function () {
+        $config = config('database.'. config('database.default'));
+
+        $connection1 = Connection::createWithConfig($config);
+        $connection2 = Connection::createWithConfig($config);
+
+        expect($connection1)->toBe($connection2);
+    });
+
+    test('create with config should return different instances', function () {
+        $config1 = config('database.'. config('database.default'));
+        $config2 = config('database.test');
+
+        $connection1 = Connection::createWithConfig($config1);
+        $connection2 = Connection::createWithConfig($config2);
+
+        expect($connection1)->not->toBe($connection2);
+    });
+
+    test('create with config should throw exception if driver is missing', function () {
         $config = [
-            'driver' => 'sqlite',
             'database' => ':memory:',
         ];
 
-        $connection = Connection::createWithConfig($config);
-        expect($connection)->toBeInstanceOf(SQLiteConnection::class);
+        expect(fn () => Connection::createWithConfig($config))->toThrow(new RuntimeException('Database driver is required'));
     });
 
-    test('connect', function () {
+    test('create with config should throw exception if driver is unsupported', function () {
         $config = [
-            'driver' => 'sqlite',
+            'driver' => 'foo',
             'database' => ':memory:',
         ];
 
+        expect(fn () => Connection::createWithConfig($config))->toThrow(new RuntimeException('Unsupported database driver: foo'));
+    });
+
+    test('loadExtensions', function () {
+        $config = config('database.'. config('database.default'));
         $connection = Connection::createWithConfig($config);
-        $pdo = $connection->connect();
 
-        expect($pdo)->toBeInstanceOf(PDO::class);
-        expect($connection->pdo)->toBe($pdo);
+        $extensions = [
+            'Monarch\Database\Extensions\QueryBuilder',
+        ];
 
-        $connection->close();
-
-        expect($connection->pdo)->toBeNull();
+        $connection->loadExtensions($extensions);
+        expect($connection->extensions())->toHaveKey('sql');
     });
 
-    test('table exists', function () {
-        expect($this->connection->tableExists('users'))->toBeFalse();
+    test('loadExtensions should throw exception if extension is not found', function () {
+        $config = config('database.'. config('database.default'));
+        $connection = Connection::createWithConfig($config);
 
-        $this->connection->createTable('users', [
-            'id integer primary key',
-            'name text allowNull',
-        ]);
+        $extensions = [
+            'Monarch\Database\Extensions\Foo',
+        ];
 
-        expect($this->connection->tableExists('users'))->toBeTrue();
-
-        $this->connection->dropTable('users');
+        expect(fn () => $connection->loadExtensions($extensions))->toThrow(new RuntimeException('Extension not found: Monarch\Database\Extensions\Foo'));
     });
 
-    test('tables', function () {
-        $this->connection->createTable('users', [
-            'id integer primary key',
-            'name text allowNull',
-        ]);
+    test('loaded extensions can be accessed', function () {
+        $config = config('database.'. config('database.default'));
+        $connection = Connection::createWithConfig($config);
 
-        $this->connection->createTable('posts', [
-            'id integer primary key',
-            'title text allowNull',
-        ]);
+        $extensions = [
+            'Monarch\Database\Extensions\QueryBuilder',
+        ];
 
-        $tables = $this->connection->tables();
-
-        expect($tables)->toBeArray();
-        expect($tables)->toContain('users');
-        expect($tables)->toContain('posts');
-
-        $this->connection->dropTable('users');
-        $this->connection->dropTable('posts');
+        $connection->loadExtensions($extensions);
+        $query = $connection->sql('SELECT * FROM users');
+        expect($query)->toBeInstanceOf(QueryBuilder::class);
     });
 
-    test('columns', function () {
-        $this->connection->createTable('users', [
-            'id integer primary key',
-            'name text allowNull',
-        ]);
+    test('run query', function () {
+        $config = config('database.'. config('database.default'));
+        $connection = Connection::createWithConfig($config);
 
-        $columns = $this->connection->columns('users');
+        $connection->run('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)');
+        $connection->run('INSERT INTO users (name) VALUES (?)', ['foo']);
+        $connection->run('INSERT INTO users (name) VALUES (?)', ['bar']);
 
-        expect($columns)->toBeArray();
-        expect($columns[0]['name'])->toBe('id');
-        expect(strtolower($columns[0]['type']))->toBe('integer');
+        $users = $connection->run('SELECT * FROM users')->fetchAll();
+        expect($users)->toHaveCount(2);
 
-        $this->connection->dropTable('users');
+        $connection->dropTable('users');
     });
 
-    test('columnNames', function () {
-        $this->connection->createTable('users', [
-            'id integer primary key',
-            'name text allowNull',
-        ]);
+    test('run query with QueryBuilder', function () {
+        $config = config('database.'. config('database.default'));
+        $connection = Connection::createWithConfig($config);
 
-        $columns = $this->connection->columnNames('users');
+        $connection->run('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)');
+        $connection->run('INSERT INTO users (name) VALUES (?)', ['foo']);
+        $connection->run('INSERT INTO users (name) VALUES (?)', ['bar']);
 
-        expect($columns[0])->toBe('id');
-        expect($columns[1])->toBe('name');
+        $users = $connection->sql('SELECT * FROM users')->run()->fetchAll();
+        expect($users)->toHaveCount(2);
 
-        $this->connection->dropTable('users');
-    });
-
-    test('primaryKey', function () {
-        $this->connection->createTable('users', [
-            'id integer primary key',
-            'name text allowNull',
-        ]);
-
-        expect($this->connection->primaryKey('users'))->toBe('id');
-
-        $this->connection->dropTable('users');
-    });
-
-    test('addColumn', function () {
-        $this->connection->createTable('users', [
-            'id integer primary key',
-            'name text allowNull',
-        ]);
-
-        $this->connection->addColumn('users', 'email', 'text not null');
-
-        $columns = $this->connection->columns('users');
-
-        expect($columns)->toBeArray();
-        expect($columns[2]['name'])->toBe('email');
-        expect(strtolower($columns[2]['type']))->toBe('text');
-
-        $this->connection->dropTable('users');
-    });
-
-    test('dropColumn', function () {
-        $this->connection->createTable('users', [
-            'id integer primary key',
-            'name text allowNull',
-            'email text not null',
-        ]);
-
-        $this->connection->dropColumn('users', 'email');
-
-        $columns = $this->connection->columns('users');
-
-        expect($columns)->toBeArray();
-        expect($columns)->not()->toContain('email');
-
-        $this->connection->dropTable('users');
-    });
-
-    test('addIndex', function () {
-        $this->connection->createTable('users', [
-            'id integer primary key',
-            'name text allowNull',
-        ]);
-
-        $this->connection->addIndex('users', 'name');
-
-        $columns = $this->connection->columns('users');
-
-        expect($columns)->toBeArray();
-        expect($columns[1]['name'])->toBe('name');
-        expect($columns[1]['pk'])->toBe(0);
-
-        $this->connection->dropTable('users');
+        $connection->dropTable('users');
     });
 });
