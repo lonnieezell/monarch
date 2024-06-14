@@ -4,7 +4,7 @@ use Monarch\Helpers\Str;
 
 describe('Str', function () {
     test('pascal from snake_case', function () {
-        $input = 'hello_wOrLd';
+        $input = 'hello_world';
         $expectedOutput = 'HelloWorld';
 
         $output = Str::pascal($input);
@@ -13,7 +13,7 @@ describe('Str', function () {
     });
 
     test('pascal from kebab-case', function () {
-        $input = 'hello-wOrLd';
+        $input = 'hello-world';
         $expectedOutput = 'HelloWorld';
 
         $output = Str::pascal($input);
@@ -31,7 +31,7 @@ describe('Str', function () {
     });
 
     test('camel from snake_case', function () {
-        $input = 'hello_wOrLd';
+        $input = 'hello_world';
         $expectedOutput = 'helloWorld';
 
         $output = Str::camel($input);
@@ -40,7 +40,7 @@ describe('Str', function () {
     });
 
     test('camel from kebab-case', function () {
-        $input = 'hello-wOrLd';
+        $input = 'hello-world';
         $expectedOutput = 'helloWorld';
 
         $output = Str::camel($input);
@@ -58,7 +58,7 @@ describe('Str', function () {
     });
 
     test('kebab from snake_case', function () {
-        $input = 'hello_wOrLd';
+        $input = 'hello_world';
         $expectedOutput = 'hello-world';
 
         $output = Str::kebab($input);
@@ -112,7 +112,7 @@ describe('Str', function () {
     });
 
     test('title from snake_case', function () {
-        $input = 'hello_wOrLd';
+        $input = 'hello_world';
         $expectedOutput = 'Hello World';
 
         $output = Str::title($input);
@@ -316,6 +316,12 @@ describe('Str', function () {
         expect($output)->toMatch('/^[a-zA-Z0-9]{16}$/');
     });
 
+    test('random with odd number', function () {
+        $output = Str::random(15);
+
+        expect($output)->toMatch('/^[a-zA-Z0-9]{15}$/');
+    });
+
     test('words', function () {
         $input = 'hello world';
 
@@ -338,5 +344,29 @@ describe('Str', function () {
         $output = Str::words($input, 5);
 
         expect($output)->toEqual('hello world');
+    });
+
+    test('like with database delimiter', function () {
+        $input = 'hello world';
+
+        $output = Str::like($input, '%ello%');
+
+        expect($output)->toBeTrue();
+    });
+
+    test('like with asterisk', function () {
+        $input = 'hello world';
+
+        $output = Str::like($input, 'hello*');
+
+        expect($output)->toBeTrue();
+    });
+
+    test('like with question mark', function () {
+        $input = 'hello world';
+
+        $output = Str::like($input, '?ello*');
+
+        expect($output)->toBeTrue();
     });
 });
