@@ -10,7 +10,6 @@ markdown_extensions:
 theme:
     name: material
     features:
-        - navigation.sections
     logo: assets/logo.png
     palette:
         # Palette toggle for light mode
