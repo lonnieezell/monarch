@@ -206,8 +206,6 @@ describe('Database Tables', function () {
             'FOREIGN KEY(user_id) REFERENCES users(id)',
         ]);
 
-        $db = db();
-
         expect(db()->foreignKeyExists('posts', 'user_id'))->toBeTrue();
         expect(db()->foreignKeyExists('posts', 'user_email'))->toBeFalse();
     });

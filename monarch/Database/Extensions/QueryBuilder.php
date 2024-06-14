@@ -196,4 +196,9 @@ class QueryBuilder implements ExtensionInterface
         // Return control back to the connection
         return $this->connection->$method(...$args);
     }
+
+    public function __toString()
+    {
+        return $this->toString();
+    }
 }
