@@ -61,6 +61,7 @@ nav:
         - Getting Started: database/connections.md
         - Running Queries: database/queries.md
         - Query Builder: database/query_builder.md
+        - Migrations: database/migrations.md
         - Extending: database/extending.md
     - Helpers:
         - Files: helpers/files.md

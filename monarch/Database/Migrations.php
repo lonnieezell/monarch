@@ -4,6 +4,10 @@ namespace Monarch\Database;
 
 use Closure;
 use PDOException;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RecursiveRegexIterator;
+use RegexIterator;
 
 /**
  * Provides a way to manage database migrations.
@@ -17,6 +21,9 @@ use PDOException;
 class Migrations
 {
     private Connection $connection;
+    private string $basePath = ROOTPATH .'database/migrations';
+    private string $subDirectory = '';
+    private string $onlyMigration = '';
 
     public function __construct(?Connection $connection = null)
     {
@@ -25,6 +32,36 @@ class Migrations
         }
 
         $this->connection = $connection;
+    }
+
+    /**
+     * Set the path to the migrations directory.
+     */
+    public function setMigrationsPath(string $path): self
+    {
+        $this->basePath = rtrim($path, ' /') .'/';
+
+        return $this;
+    }
+
+    /**
+     * Only run a single migration file.
+     */
+    public function only(string $migration): self
+    {
+        $this->onlyMigration = $migration;
+
+        return $this;
+    }
+
+    /**
+     * Set a sub-directory within the migrations directory.
+     */
+    public function inDirectory(string $dir): self
+    {
+        $this->subDirectory = rtrim($dir, ' /') .'/';
+
+        return $this;
     }
 
     /**
@@ -43,42 +80,19 @@ class Migrations
     }
 
     /**
-     * Rollback the last migration.
-     */
-    public function rollback(Closure $callback = null): void
-    {
-        $this->createMigrationsTable();
-
-        $migrations = $this->getLatestMigrationBatch();
-
-        if (!$migrations) {
-            return;
-        }
-
-        foreach ($migrations as $migration) {
-            $callback && $callback($migration['migration']);
-            $this->rollbackMigration($migration);
-        }
-
-        $this->connection->sql('DELETE FROM migrations
-            WHERE batch = ?', [
-                $migrations[0]['batch']
-            ])
-            ->run();
-    }
-
-    /**
-     * Start fresh by rolling back all migrations.
+     * Drop all tables in the database and re-run all migrations.
      */
     public function fresh(): void
     {
         $this->createMigrationsTable();
 
-        $migrations = $this->getCompletedMigrations();
+        $tables = $this->connection->tables();
 
-        foreach ($migrations as $migration) {
-            $this->rollbackMigration($migration);
+        foreach ($tables as $table) {
+            $this->connection->dropTable($table['name']);
         }
+
+        $this->latest();
     }
 
     /**
@@ -87,7 +101,6 @@ class Migrations
     private function createMigrationsTable(): void
     {
         $this->connection->sql('CREATE TABLE IF NOT EXISTS migrations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
             migration TEXT,
             batch INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -104,12 +117,28 @@ class Migrations
     {
         $migrations = $this->getCompletedMigrations();
         $ranMigrations = array_column($migrations, 'migration');
+        $onlyMigration = $this->basePath . $this->onlyMigration;
 
-        $files = glob('database/migrations/*.php');
+        $startPath = $this->subDirectory
+            ? "{$this->basePath}{$this->subDirectory}"
+            : $this->basePath;
 
-        $waitingMigrations = array_filter($files, function ($file) use ($ranMigrations) {
-            return !in_array($file, $ranMigrations);
-        });
+        // Recursively search for migration files.
+        $dir = new RecursiveDirectoryIterator($startPath);
+        $iterator = new RecursiveIteratorIterator($dir);
+        $files = new RegexIterator($iterator, '/^.+\.sql$/i', RecursiveRegexIterator::GET_MATCH);
+        $waitingMigrations = [];
+
+        foreach ($files as $file) {
+            if (in_array($file[0], $ranMigrations)) {
+                continue;
+            }
+            if ($this->onlyMigration && $onlyMigration !== $file[0]) {
+                continue;
+            }
+
+            $waitingMigrations[] = $file[0];
+        }
 
         $lastBatch = count($migrations) > 0
             ? max(array_column($migrations, 'batch'))
@@ -130,66 +159,22 @@ class Migrations
      */
     private function getCompletedMigrations(): array
     {
-        return $this->connection->run('SELECT * FROM migrations ORDER BY id DESC')
+        return $this->connection->run('SELECT * FROM migrations ORDER BY created_at DESC')
             ->fetchAll();
-    }
-
-    /**
-     * Returns the migrations in the most recent batch that have been ran.
-     *
-     * @throws PDOException
-     */
-    private function getLatestMigrationBatch(): ?array
-    {
-        $migrations = $this->getCompletedMigrations();
-        $latestBatch = max(array_column($migrations, 'batch'));
-
-        return array_filter($migrations, function ($migration) use ($latestBatch) {
-            return $migration['batch'] === $latestBatch;
-        });
     }
 
     /**
      * Runs a single migration.
      */
-    private function runMigration(array $migration, int $batchId): void
+    private function runMigration(string $migration, int $batchId): void
     {
-        $this->connection->pdo->beginTransaction();
+        $sql = file_get_contents($migration);
+        $this->connection->run($sql);
 
-        try {
-            $class = require_once $migration['migration'];
-            $class->up();
-
-            $this->connection->sql('INSERT INTO migrations (migration, batch, created_at) VALUES (:migration, :batch, NOW())', [
-                    ':migration' => $migration['migration'],
-                    ':batch' => $batchId,
-                ])
-                ->run();
-
-            $this->connection->pdo->commit();
-        } catch (PDOException $e) {
-            $this->connection->pdo->rollback();
-            throw $e;
-        }
-    }
-
-    /**
-     * Rollback a migration.
-     * @param array $migration
-     * @return void
-     */
-    private function rollbackMigration(array $migration): void
-    {
-        $this->connection->pdo->beginTransaction();
-
-        try {
-            $class = require_once $migration['migration'];
-            $class->down();
-
-            $this->connection->pdo->commit();
-        } catch (PDOException $e) {
-            $this->connection->pdo->rollback();
-            throw $e;
-        }
+        $this->connection->sql('INSERT INTO migrations (migration, batch, created_at) VALUES (:migration, :batch, NOW())', [
+                ':migration' => $migration,
+                ':batch' => $batchId,
+            ])
+            ->run();
     }
 }

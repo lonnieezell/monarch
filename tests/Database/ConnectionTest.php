@@ -3,7 +3,6 @@
 use Monarch\Database\Connection;
 use Monarch\Database\DriverInterface;
 use Monarch\Database\Drivers\MySQLDriver;
-use Monarch\Database\Drivers\PostgreSQLDriver;
 use Monarch\Database\Drivers\SQLiteDriver;
 use Monarch\Database\Extensions\QueryBuilder;
 
@@ -16,7 +15,6 @@ describe('Database Connection', function () {
         expect(get_class($connection))->toBeIn([
             SQLiteDriver::class,
             MySQLDriver::class,
-            PostgreSQLDriver::class,
         ]);
     });
 

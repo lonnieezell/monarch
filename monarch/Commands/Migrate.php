@@ -9,7 +9,6 @@ class Migrate extends Command
     protected string $description = 'Migrates the database';
     protected string $group = 'Database';
     protected array $options = [
-        '--R|rollback' => 'Rolls back the last batch of migrations',
         '--F|fresh' => 'Drops all tables and re-runs all migrations',
     ];
 
@@ -26,9 +25,16 @@ class Migrate extends Command
     {
         $this->info('Migrating database...');
 
-        if ($this->option('rollback')) {
-            $this->migrations->rollback(fn ($migration) => $this->info("Rolling back: {$migration}"));
-        } elseif ($this->option('fresh')) {
+        // The first argument is the migration name/folder
+        if ($migration = $this->argument('migration')) {
+            if (is_dir($migration)) {
+                $this->migrations->inDirectory($migration);
+            } elseif (is_file($migration)) {
+                $this->migrations->only($migration);
+            }
+        }
+
+        if ($this->option('fresh')) {
             $this->migrations->fresh();
         } else {
             $this->migrations->latest(fn ($migration) => $this->info("Migrating: {$migration}"));
