@@ -1,11 +1,14 @@
 <?php
 
-namespace Monarch\Database;
+namespace Monarch\Database\Drivers;
 
+use DateTimeInterface;
+use Monarch\Database\Connection;
+use Monarch\Database\DriverInterface;
 use PDO;
 use PDOException;
 
-class SQLiteConnection extends Connection implements DatabaseInterface
+class SQLiteDriver extends Connection implements DriverInterface
 {
     /**
      * Connect to the database.
@@ -37,6 +40,14 @@ class SQLiteConnection extends Connection implements DatabaseInterface
     }
 
     /**
+     * Returns the correct date/time format for the database.
+     */
+    public function formatDateTime(DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
+
+    /**
      * Checks if a table exists in the database.
      *
      * Example:
@@ -49,7 +60,8 @@ class SQLiteConnection extends Connection implements DatabaseInterface
         $this->ensureConnection();
 
         $query = $this->run("SELECT name FROM sqlite_master WHERE type='table' AND name = ?", [$table]);
-        return (bool) $query->fetchColumn();
+        $column = $query->fetchColumn();
+        return $column !== false;
     }
 
     /**
@@ -64,8 +76,22 @@ class SQLiteConnection extends Connection implements DatabaseInterface
     {
         $this->ensureConnection();
 
-        $query = $this->run("SELECT name FROM sqlite_master WHERE type='table'");
-        return $query->fetchAll(PDO::FETCH_COLUMN) ?? [];
+        $query = $this->run("SELECT name, type = 'view' as view
+			FROM sqlite_master
+			WHERE type IN ('table', 'view') AND name NOT LIKE 'sqlite_%'
+            ORDER BY name");
+        $rows = $query->fetchAll() ?? [];
+
+        $tables = [];
+
+        foreach ($rows as $row) {
+            $tables[] = [
+                'name' => $row['name'],
+                'view' => (bool)$row['view'],
+            ];
+        }
+
+        return $tables;
     }
 
     /**
@@ -80,8 +106,38 @@ class SQLiteConnection extends Connection implements DatabaseInterface
     {
         $this->ensureConnection();
 
-        $query = $this->run("PRAGMA table_info($table)");
-        return $query->fetchAll(PDO::FETCH_ASSOC) ?? [];
+        $meta = $this->run("SELECT sql
+			FROM sqlite_master
+			WHERE type = 'table' AND name = {$this->pdo->quote($table)}
+			UNION ALL
+			SELECT sql
+			FROM sqlite_temp_master
+			WHERE type = 'table' AND name = {$this->pdo->quote($table)}
+			X")->fetch();
+
+        $query = $this->run("PRAGMA table_info({$table})");
+        $rows = $query->fetchAll(PDO::FETCH_ASSOC) ?? [];
+        $columns = [];
+
+        foreach ($rows as $row) {
+            $column = $row['name'];
+            $pattern = "/(\"$column\"|`$column`|\\[$column\\]|$column)\\s+[^,]+\\s+PRIMARY\\s+KEY\\s+AUTOINCREMENT/Ui";
+            $pair = explode('(', $row['type']);
+            $type = $pair[0];
+
+            $columns[] = [
+                'name' => $row['name'],
+                'table' => $table,
+                'type' => $type,
+                'nativetype' => strtoupper($pair[0]),
+                'size' => isset($pair[1]) ? (int) $pair[1] : null,
+                'nullable' => !$row['notnull'],
+                'default' => $row['dflt_value'],
+                'autoincrement' => $meta && preg_match($pattern, (string) $meta['sql']),
+                'primary' => $row['pk'] > 0,
+                'vendor' => $row,
+            ];
+        }
     }
 
     /**
@@ -154,67 +210,46 @@ class SQLiteConnection extends Connection implements DatabaseInterface
     {
         $this->ensureConnection();
 
-        $this->run("DROP TABLE $table");
+        $this->run("DROP TABLE IF EXISTS $table");
     }
 
     /**
-     * Add a column to a table.
+     * Get a list of all indexes in a table.
      *
      * Example:
-     * db()->addColumn('users', 'email', 'TEXT NOT NULL');
+     * $indexes = db()->indexes('users');
      *
-     * @throws PDOException
+     * returns: [
+     *    [
+     *      'name' => 'PRIMARY',
+     *      'unique' => true,
+     *      'primary' => true,
+     *      'columns' => ['id']
+     *   ],
+     * ];
      */
-    public function addColumn(string $table, string $column, string $type): void
+    public function indexes(string $table): array
     {
         $this->ensureConnection();
 
-        $this->run("ALTER TABLE $table ADD COLUMN $column $type");
-    }
+        $query = $this->run("PRAGMA index_list($table)");
+        $indexes = $query->fetchAll(PDO::FETCH_ASSOC);
 
-    /**
-     * Drop a column from a table.
-     *
-     * Example:
-     * db()->dropColumn('users', 'email');
-     *
-     * @throws PDOException
-     */
-    public function dropColumn(string $table, string $column): void
-    {
-        $this->ensureConnection();
+        $list = [];
 
-        $this->run("ALTER TABLE $table DROP COLUMN $column");
-    }
+        foreach ($indexes as $index) {
+            $query = $this->run("PRAGMA index_info({$index['name']})");
+            $columns = $query->fetchAll(PDO::FETCH_ASSOC);
 
-    /**
-     * Add an index to a table.
-     *
-     * Example:
-     * db()->addIndex('users', 'email');
-     *
-     * @throws PDOException
-     */
-    public function addIndex(string $table, string $column): void
-    {
-        $this->ensureConnection();
+            $list[] = [
+                'name' => $index['name'],
+                'unique' => $index['unique'] === 1,
+                'primary' => $index['origin'] === 'pk',
+                'columns' => array_map(fn ($column) => $column['name'], $columns),
+            ];
+        }
 
-        $this->run("CREATE INDEX {$table}_{$column}_index ON $table ($column)");
-    }
-
-    /**
-     * Drop an index from a table.
-     *
-     * Example:
-     * db()->dropIndex('users', 'email');
-     *
-     * @throws PDOException
-     */
-    public function dropIndex(string $table, string $column): void
-    {
-        $this->ensureConnection();
-
-        $this->run("DROP INDEX {$table}_{$column}_index");
+        return $list;
     }
 
     /**
@@ -225,7 +260,7 @@ class SQLiteConnection extends Connection implements DatabaseInterface
      *
      * @throws PDOException
      */
-    public function indexExists(string $table, string $column): bool
+    public function indexExists(string $table, string $name): bool
     {
         $this->ensureConnection();
 
@@ -233,7 +268,7 @@ class SQLiteConnection extends Connection implements DatabaseInterface
         $indexes = $query->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($indexes as $index) {
-            if ($index['name'] === "{$table}_{$column}_index") {
+            if ($index['name'] === "{$name}") {
                 return true;
             }
         }
@@ -242,33 +277,39 @@ class SQLiteConnection extends Connection implements DatabaseInterface
     }
 
     /**
-     * Add a foreign key to a table.
+     * Get a list of all foreign keys in a table.
      *
      * Example:
-     * db()->addForeignKey('users', 'role_id', 'roles', 'id');
+     * $foreignKeys = db()->foreignKeys('users');
      *
-     * @throws PDOException
+     * returns: [
+     *   [
+     *      'name' => 'users_role_id_foreign',
+     *      'local' => 'role_id',
+     *      'table' => 'roles',
+     *      'foreign' => 'id',
+     *  ],
+     * ];
      */
-    public function addForeignKey(string $table, string $column, string $foreignTable, string $foreignColumn): void
+    public function foreignKeys(string $table): array
     {
         $this->ensureConnection();
 
-        $this->run("ALTER TABLE $table ADD FOREIGN KEY ($column) REFERENCES $foreignTable($foreignColumn)");
-    }
+        $query = $this->run("PRAGMA foreign_key_list($table)");
+        $foreignKeys = $query->fetchAll(PDO::FETCH_ASSOC);
 
-    /**
-     * Drop a foreign key from a table.
-     *
-     * Example:
-     * db()->dropForeignKey('users', 'role_id');
-     *
-     * @throws PDOException
-     */
-    public function dropForeignKey(string $table, string $column): void
-    {
-        $this->ensureConnection();
+        $list = [];
 
-        $this->run("ALTER TABLE $table DROP FOREIGN KEY $table{$column}_foreign");
+        foreach ($foreignKeys as $foreignKey) {
+            $list[] = [
+                'name' => $foreignKey['id'],
+                'local' => $foreignKey['from'],
+                'table' => $foreignKey['table'],
+                'foreign' => $foreignKey['to'],
+            ];
+        }
+
+        return $list;
     }
 
     /**

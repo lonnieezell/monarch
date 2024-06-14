@@ -1,11 +1,14 @@
 <?php
 
-namespace Monarch\Database;
+namespace Monarch\Database\Drivers;
 
+use DateTimeInterface;
+use Monarch\Database\Connection;
+use Monarch\Database\DriverInterface;
 use PDO;
 use PDOException;
 
-class MySQLConnection extends Connection implements DatabaseInterface
+class MySQLDriver extends Connection implements DriverInterface
 {
     /**
      * Connect to the database.
@@ -58,6 +61,14 @@ class MySQLConnection extends Connection implements DatabaseInterface
     }
 
     /**
+     * Returns the correct date/time format for the database.
+     */
+    public function formatDateTime(DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
+
+    /**
      * Checks if a table exists in the database.
      *
      * Example:
@@ -69,8 +80,8 @@ class MySQLConnection extends Connection implements DatabaseInterface
     {
         $this->ensureConnection();
 
-        $query = $this->run("SHOW TABLES LIKE ?", [$table]);
-        return (bool) $query->fetchColumn();
+        $tables = $this->tables();
+        return in_array($table, array_column($tables, 'name'));
     }
 
     /**
@@ -85,8 +96,19 @@ class MySQLConnection extends Connection implements DatabaseInterface
     {
         $this->ensureConnection();
 
-        $query = $this->run("SHOW TABLES");
-        return $query->fetchAll(PDO::FETCH_COLUMN) ?? [];
+        $query = $this->run("SHOW FULL TABLES");
+        $rows = $query->fetchAll(PDO::FETCH_COLUMN) ?? [];
+
+        $tables = [];
+
+        foreach ($rows as $row) {
+            $tables[] = [
+                'name' => is_string($row) ? $row : $row[0],
+                'view' => is_string($row) ? false : ($row[1] ?? null) === 'VIEW',
+            ];
+        }
+
+        return $tables;
     }
 
     /**
@@ -101,8 +123,31 @@ class MySQLConnection extends Connection implements DatabaseInterface
     {
         $this->ensureConnection();
 
-        $query = $this->run("DESCRIBE $table");
-        return $query->fetchAll(PDO::FETCH_ASSOC) ?? [];
+        $query = $this->run("SHOW FULL COLUMNS FROM $table");
+        $rows = $query->fetchAll(PDO::FETCH_ASSOC) ?? [];
+        $columns = [];
+
+        // Ensure all key names are lowercase
+        $rows = array_map('array_change_key_case', $rows);
+
+        foreach ($rows as $key => $row) {
+            $pair = explode('(', $row['type']);
+
+            $columns[] = [
+                'name' => $row['field'],
+                'table' => $table,
+                'type' => $row['type'],
+                'nativetype' => strtoupper($pair[0]),
+                'size' => isset($pair[1]) ? (int) $pair[1] : null,
+                'nullable' => $row['null'] === 'YES',
+                'default' => $row['default'],
+                'autoincrement' => $row['extra'] === 'auto_increment',
+                'primary' => $row['key'] === 'PRI',
+                'vendor' => $row,
+            ];
+        }
+
+        return $columns;
     }
 
     /**
@@ -116,7 +161,7 @@ class MySQLConnection extends Connection implements DatabaseInterface
     public function columnNames(string $table): array
     {
         $columns = $this->columns($table);
-        return array_map(fn ($column) => $column['Field'], $columns);
+        return array_map(fn ($column) => $column['name'], $columns);
     }
 
     /**
@@ -132,8 +177,8 @@ class MySQLConnection extends Connection implements DatabaseInterface
         $columns = $this->columns($table);
 
         foreach ($columns as $column) {
-            if ($column['Key'] === 'PRI') {
-                return $column['Field'];
+            if ($column['primary'] === true) {
+                return $column['name'];
             }
         }
 
@@ -175,67 +220,55 @@ class MySQLConnection extends Connection implements DatabaseInterface
     {
         $this->ensureConnection();
 
-        $this->run("DROP TABLE $table");
+        $this->disableForeignKeys();
+        $this->run("DROP TABLE IF EXISTS $table");
+        $this->enableForeignKeys();
     }
 
     /**
-     * Add a column to a table.
+     * Get a list of all indexes in a table.
      *
      * Example:
-     *  db()->addColumn('users', 'email', 'TEXT NOT NULL');
+     * $indexes = db()->indexes('users');
      *
-     * @throws PDOException
+     * returns: [
+     *    [
+     *      'name' => 'PRIMARY',
+     *      'unique' => true,
+     *      'primary' => true,
+     *      'columns' => ['id']
+     *   ],
+     * ];
      */
-    public function addColumn(string $table, string $column, string $type): void
+    public function indexes(string $table): array
     {
         $this->ensureConnection();
 
-        $this->run("ALTER TABLE $table ADD COLUMN $column $type");
-    }
+        $query = $this->run("SHOW INDEX FROM $table");
+        $rows = $query->fetchAll(PDO::FETCH_ASSOC) ?? [];
 
-    /**
-     * Drop a column from a table.
-     *
-     * Example:
-     *  db()->dropColumn('users', 'email');
-     *
-     * @throws PDOException
-     */
-    public function dropColumn(string $table, string $column): void
-    {
-        $this->ensureConnection();
+        $indexes = [];
 
-        $this->run("ALTER TABLE $table DROP COLUMN $column");
-    }
+        // Ensure all key names are lowercase
+        $rows = array_map('array_change_key_case', $rows);
 
-    /**
-     * Add an index to a table.
-     *
-     * Example:
-     *  db()->addIndex('users', 'email');
-     *
-     * @throws PDOException
-     */
-    public function addIndex(string $table, string $column): void
-    {
-        $this->ensureConnection();
+        foreach ($rows as $row) {
+            $name = $row['key_name'];
+            $column = $row['column_name'];
 
-        $this->run("ALTER TABLE $table ADD INDEX ($column)");
-    }
+            if (! isset($indexes[$name])) {
+                $indexes[$name] = [
+                    'name' => $name,
+                    'unique' => ! (bool)$row['non_unique'],
+                    'primary' => $name === 'PRIMARY',
+                    'columns' => [
+                        ($row['seq_in_index'] - 1) => $column,
+                    ],
+                ];
+            }
+        }
 
-    /**
-     * Drop an index from a table.
-     *
-     * Example:
-     *  db()->dropIndex('users', 'email');
-     *
-     * @throws PDOException
-     */
-    public function dropIndex(string $table, string $column): void
-    {
-        $this->ensureConnection();
-
-        $this->run("ALTER TABLE $table DROP INDEX ($column)");
+        return $indexes;
     }
 
     /**
@@ -250,38 +283,58 @@ class MySQLConnection extends Connection implements DatabaseInterface
     {
         $this->ensureConnection();
 
-        $query = $this->run("SHOW INDEX FROM $table WHERE Column_name = ?", [$column]);
-        return (bool) $query->fetchColumn();
+        $indexes = $this->indexes($table);
+
+        foreach ($indexes as $index) {
+            if (in_array($column, $index['columns'])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
-     * Add a foreign key to a table.
+     * Get a list of all foreign keys in a table.
      *
      * Example:
-     *  db()->addForeignKey('users', 'role_id', 'roles', 'id');
+     * $foreignKeys = db()->foreignKeys('users');
      *
-     * @throws PDOException
+     * returns: [
+     *   [
+     *      'name' => 'users_role_id_foreign',
+     *      'local' => 'role_id',
+     *      'table' => 'roles',
+     *      'foreign' => 'id',
+     *  ],
+     * ];
      */
-    public function addForeignKey(string $table, string $column, string $foreignTable, string $foreignColumn): void
+    public function foreignKeys(string $table): array
     {
         $this->ensureConnection();
 
-        $this->run("ALTER TABLE $table ADD FOREIGN KEY ($column) REFERENCES $foreignTable($foreignColumn)");
-    }
+        $query = $this->run(<<<X
+            SELECT CONSTRAINT_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
+            FROM information_schema.KEY_COLUMN_USAGE
+            WHERE TABLE_SCHEMA = DATABASE()
+                AND REFERENCED_TABLE_NAME IS NOT NULL
+                AND TABLE_NAME = ?
+            X, [$table]);
 
-    /**
-     * Drop a foreign key from a table.
-     *
-     * Example:
-     *  db()->dropForeignKey('users', 'role_id');
-     *
-     * @throws PDOException
-     */
-    public function dropForeignKey(string $table, string $column): void
-    {
-        $this->ensureConnection();
+        $rows = $query->fetchAll(PDO::FETCH_ASSOC) ?? [];
 
-        $this->run("ALTER TABLE $table DROP FOREIGN KEY $column");
+        $keys = [];
+
+        foreach ($rows as $row) {
+            $keys[] = [
+                'name' => $row['CONSTRAINT_NAME'],
+                'local' => $row['COLUMN_NAME'],
+                'table' => $row['REFERENCED_TABLE_NAME'],
+                'foreign' => $row['REFERENCED_COLUMN_NAME'],
+            ];
+        }
+
+        return $keys;
     }
 
     /**
@@ -296,10 +349,15 @@ class MySQLConnection extends Connection implements DatabaseInterface
     {
         $this->ensureConnection();
 
-        $query = $this->run("SHOW CREATE TABLE $table");
-        $result = $query->fetchColumn();
+        $keys = $this->foreignKeys($table);
 
-        return strpos($result, "FOREIGN KEY ($column)") !== false;
+        foreach ($keys as $key) {
+            if ($key['local'] === $column) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

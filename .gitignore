@@ -13,7 +13,7 @@ phpunit.xml
 #-------------------------
 # Writable Folder
 #-------------------------
-Writable/
+writable/*
 
 #-------------------------
 # Temporary Files

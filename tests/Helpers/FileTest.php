@@ -1,5 +1,3 @@
-uses(\Monarch\Helpers\File::class);
-
 <?php
 
 use Monarch\Helpers\Files;

@@ -1,6 +1,6 @@
 <?php
 
-use Monarch\Database\QueryBuilder;
+use Monarch\Database\Extensions\QueryBuilder;
 
 describe('QueryBuilder', function () {
     it('should concatenate SQL lines', function () {
@@ -43,5 +43,25 @@ describe('QueryBuilder', function () {
 
         expect($queryBuilder->toSql())->toBe('SELECT * FROM users WHERE id = ? AND id = ? AND id = ?');
         expect($queryBuilder->bindings())->toBe([1, 2, 3]);
+    });
+
+    it('should reset the query', function () {
+        $queryBuilder = new QueryBuilder();
+
+        $queryBuilder->sql('SELECT * FROM users')
+            ->concat('WHERE id = ?', [1])
+            ->reset();
+
+        expect($queryBuilder->toSql())->toBe('');
+        expect($queryBuilder->bindings())->toBe([]);
+    });
+
+    it('should return the query as a string', function () {
+        $queryBuilder = new QueryBuilder();
+
+        $queryBuilder->sql('SELECT * FROM users')
+            ->concat('WHERE id = ?', [1]);
+
+        expect((string) $queryBuilder)->toBe("SELECT * FROM users WHERE id = '1'");
     });
 });

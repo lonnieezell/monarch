@@ -53,7 +53,9 @@ if (! function_exists('db')) {
     function db(?string $connectionName = null): Connection
     {
         if ($connectionName === null) {
-            $connectionName = config('database.default');
+            $connectionName = ENVIRONMENT === 'test'
+                ? 'test'
+                : config('database.default');
         }
 
         $config = config('database.' . $connectionName);

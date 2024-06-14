@@ -2,6 +2,11 @@ site_name: Monarch Web Framework
 site_description: A back-to-basics framework for the modern web.
 docs_dir: _docs
 
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
 theme:
     name: material
     features:
@@ -54,7 +59,10 @@ nav:
     - Components: view_components.md
     - Database:
         - Getting Started: database/connections.md
+        - Running Queries: database/queries.md
         - Query Builder: database/query_builder.md
+        - Migrations: database/migrations.md
+        - Extending: database/extending.md
     - Helpers:
-        - Files: files.md
-        - Strings: str.md
+        - Files: helpers/files.md
+        - Strings: helpers/str.md
