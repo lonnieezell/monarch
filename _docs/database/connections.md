@@ -33,6 +33,15 @@ If you need to manually connect to the database, you can call the `connect()` me
 db()->connect();
 ```
 
+### Getting the connection type
+
+You can get the connection type by calling the `driver()` method on the `Connection` object.
+
+```php
+$driver = db()->driver();
+// returns: 'mysql'
+```
+
 ## Using the Database
 
 To use the database, you can call the `db()` function, which returns a `Monarch\Database\Connection` object. This object provides a simple wrapper around the PDO database abstraction layer, and allows you to execute queries and fetch results.

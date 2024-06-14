@@ -80,8 +80,8 @@ class MySQLDriver extends Connection implements DriverInterface
     {
         $this->ensureConnection();
 
-        $query = $this->run("SHOW TABLES LIKE ?", [$table]);
-        return (bool) $query->fetchColumn();
+        $tables = $this->tables();
+        return in_array($table, array_column($tables, 'name'));
     }
 
     /**
@@ -103,8 +103,8 @@ class MySQLDriver extends Connection implements DriverInterface
 
         foreach ($rows as $row) {
             $tables[] = [
-                'name' => $row[0],
-                'view' => ($row[1] ?? null) === 'VIEW',
+                'name' => is_string($row) ? $row : $row[0],
+                'view' => is_string($row) ? false : ($row[1] ?? null) === 'VIEW',
             ];
         }
 
@@ -123,8 +123,31 @@ class MySQLDriver extends Connection implements DriverInterface
     {
         $this->ensureConnection();
 
-        $query = $this->run("DESCRIBE $table");
-        return $query->fetchAll(PDO::FETCH_ASSOC) ?? [];
+        $query = $this->run("SHOW FULL COLUMNS FROM $table");
+        $rows = $query->fetchAll(PDO::FETCH_ASSOC) ?? [];
+        $columns = [];
+
+        // Ensure all key names are lowercase
+        $rows = array_map('array_change_key_case', $rows);
+
+        foreach ($rows as $key => $row) {
+            $pair = explode('(', $row['type']);
+
+            $columns[] = [
+                'name' => $row['field'],
+                'table' => $table,
+                'type' => $row['type'],
+                'nativetype' => strtoupper($pair[0]),
+                'size' => isset($pair[1]) ? (int) $pair[1] : null,
+                'nullable' => $row['null'] === 'YES',
+                'default' => $row['default'],
+                'autoincrement' => $row['extra'] === 'auto_increment',
+                'primary' => $row['key'] === 'PRI',
+                'vendor' => $row,
+            ];
+        }
+
+        return $columns;
     }
 
     /**
@@ -138,7 +161,7 @@ class MySQLDriver extends Connection implements DriverInterface
     public function columnNames(string $table): array
     {
         $columns = $this->columns($table);
-        return array_map(fn ($column) => $column['Field'], $columns);
+        return array_map(fn ($column) => $column['name'], $columns);
     }
 
     /**
@@ -154,8 +177,8 @@ class MySQLDriver extends Connection implements DriverInterface
         $columns = $this->columns($table);
 
         foreach ($columns as $column) {
-            if ($column['Key'] === 'PRI') {
-                return $column['Field'];
+            if ($column['primary'] === true) {
+                return $column['name'];
             }
         }
 
@@ -197,7 +220,9 @@ class MySQLDriver extends Connection implements DriverInterface
     {
         $this->ensureConnection();
 
-        $this->run("DROP TABLE $table");
+        $this->disableForeignKeys();
+        $this->run("DROP TABLE IF EXISTS $table");
+        $this->enableForeignKeys();
     }
 
     /**
@@ -224,23 +249,26 @@ class MySQLDriver extends Connection implements DriverInterface
 
         $indexes = [];
 
+        // Ensure all key names are lowercase
+        $rows = array_map('array_change_key_case', $rows);
+
         foreach ($rows as $row) {
-            $name = $row['Key_name'];
-            $column = $row['Column_name'];
+            $name = $row['key_name'];
+            $column = $row['column_name'];
 
             if (! isset($indexes[$name])) {
                 $indexes[$name] = [
                     'name' => $name,
-                    'unique' => (bool)$row['Non_unique'],
+                    'unique' => ! (bool)$row['non_unique'],
                     'primary' => $name === 'PRIMARY',
-                    'columns' => [],
+                    'columns' => [
+                        ($row['seq_in_index'] - 1) => $column,
+                    ],
                 ];
             }
-
-            $indexes[$name]['columns'][] = $column;
         }
 
-        return array_values($indexes);
+        return $indexes;
     }
 
     /**
@@ -255,8 +283,15 @@ class MySQLDriver extends Connection implements DriverInterface
     {
         $this->ensureConnection();
 
-        $query = $this->run("SHOW INDEX FROM $table WHERE Column_name = ?", [$column]);
-        return (bool) $query->fetchColumn();
+        $indexes = $this->indexes($table);
+
+        foreach ($indexes as $index) {
+            if (in_array($column, $index['columns'])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -314,10 +349,15 @@ class MySQLDriver extends Connection implements DriverInterface
     {
         $this->ensureConnection();
 
-        $query = $this->run("SHOW CREATE TABLE $table");
-        $result = $query->fetchColumn();
+        $keys = $this->foreignKeys($table);
 
-        return strpos($result, "FOREIGN KEY ($column)") !== false;
+        foreach ($keys as $key) {
+            if ($key['local'] === $column) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

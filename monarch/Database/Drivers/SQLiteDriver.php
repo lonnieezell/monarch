@@ -60,7 +60,8 @@ class SQLiteDriver extends Connection implements DriverInterface
         $this->ensureConnection();
 
         $query = $this->run("SELECT name FROM sqlite_master WHERE type='table' AND name = ?", [$table]);
-        return (bool) $query->fetchColumn();
+        $column = $query->fetchColumn();
+        return $column !== false;
     }
 
     /**
@@ -85,8 +86,8 @@ class SQLiteDriver extends Connection implements DriverInterface
 
         foreach ($rows as $row) {
             $tables[] = [
-                'name' => $row->name,
-                'view' => (bool)$row->view,
+                'name' => $row['name'],
+                'view' => (bool)$row['view'],
             ];
         }
 
@@ -105,8 +106,38 @@ class SQLiteDriver extends Connection implements DriverInterface
     {
         $this->ensureConnection();
 
-        $query = $this->run("PRAGMA table_info($table)");
-        return $query->fetchAll(PDO::FETCH_ASSOC) ?? [];
+        $meta = $this->run("SELECT sql
+			FROM sqlite_master
+			WHERE type = 'table' AND name = {$this->pdo->quote($table)}
+			UNION ALL
+			SELECT sql
+			FROM sqlite_temp_master
+			WHERE type = 'table' AND name = {$this->pdo->quote($table)}
+			X")->fetch();
+
+        $query = $this->run("PRAGMA table_info({$table})");
+        $rows = $query->fetchAll(PDO::FETCH_ASSOC) ?? [];
+        $columns = [];
+
+        foreach ($rows as $row) {
+            $column = $row['name'];
+            $pattern = "/(\"$column\"|`$column`|\\[$column\\]|$column)\\s+[^,]+\\s+PRIMARY\\s+KEY\\s+AUTOINCREMENT/Ui";
+            $pair = explode('(', $row['type']);
+            $type = $pair[0];
+
+            $columns[] = [
+                'name' => $row['name'],
+                'table' => $table,
+                'type' => $type,
+                'nativetype' => strtoupper($pair[0]),
+                'size' => isset($pair[1]) ? (int) $pair[1] : null,
+                'nullable' => !$row['notnull'],
+                'default' => $row['dflt_value'],
+                'autoincrement' => $meta && preg_match($pattern, (string) $meta['sql']),
+                'primary' => $row['pk'] > 0,
+                'vendor' => $row,
+            ];
+        }
     }
 
     /**
@@ -179,7 +210,7 @@ class SQLiteDriver extends Connection implements DriverInterface
     {
         $this->ensureConnection();
 
-        $this->run("DROP TABLE $table");
+        $this->run("DROP TABLE IF EXISTS $table");
     }
 
     /**
@@ -229,7 +260,7 @@ class SQLiteDriver extends Connection implements DriverInterface
      *
      * @throws PDOException
      */
-    public function indexExists(string $table, string $column): bool
+    public function indexExists(string $table, string $name): bool
     {
         $this->ensureConnection();
 
@@ -237,7 +268,7 @@ class SQLiteDriver extends Connection implements DriverInterface
         $indexes = $query->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($indexes as $index) {
-            if ($index['name'] === "{$table}_{$column}_index") {
+            if ($index['name'] === "{$name}") {
                 return true;
             }
         }

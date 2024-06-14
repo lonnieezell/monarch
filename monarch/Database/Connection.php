@@ -46,7 +46,6 @@ class Connection
             $className = match ($driver) {
                 'sqlite' => SQLiteDriver::class,
                 'mysql' => MySQLDriver::class,
-                'postgres' => PostgreSQLDriver::class,
                 default => throw new RuntimeException('Unsupported database driver: ' . $driver),
             };
 
@@ -66,6 +65,14 @@ class Connection
     public function withConfig(array $config): void
     {
         $this->config = $config;
+    }
+
+    /**
+     * Return the driver name for the current connection.
+     */
+    public function driver()
+    {
+        return $this->config['driver'];
     }
 
     /**

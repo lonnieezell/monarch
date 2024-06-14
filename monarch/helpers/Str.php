@@ -112,6 +112,17 @@ class Str
     }
 
     /**
+     * Check if a string contains the given pattern, using regex.
+     */
+    public static function like(string $str, string $pattern): bool
+    {
+        $pattern = mb_strtolower($pattern);
+        $pattern = str_replace('%', '.*', preg_quote($pattern, '/'));
+
+        return (bool) preg_match('/^' . $pattern . '\z/', $str);
+    }
+
+    /**
      * Limit the number of characters in a string.
      */
     public static function limit(string $string, int $limit = 100, string $end = '...'): string
