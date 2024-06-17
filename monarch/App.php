@@ -62,24 +62,37 @@ class App
 
             // Run the middleware
             $request = $this->request;
-            $middleware = Middleware::forRequest($request)->forControl($control);
             $response = Response::createFromRequest($request);
+            $html =  Middleware::forRequest($request)
+                ->forControl($control)
+                ->process($request, $response, $action);
 
-            foreach ($middleware as $class) {
-                $action = fn ($request) => $class($request, $response, $action);
-
-                if ($action instanceof Response) {
-                    break;
-                }
-            }
-
-            $response->withBody($action($request, $response));
+            $response->withBody($html);
             $response->withBody($this->replacePerformanceMarkers($response->body()));
 
             return $response->send();
         } catch (Throwable $e) {
             return $this->handleException($e);
         }
+    }
+
+    public function processMiddleware(Request $request, Response $response, array $middleware)
+    {
+        $action = fn (Request $request, Response $response) => $middleware($request, $response);
+
+        // Run the middleware
+        $middleware = Middleware::forRequest($request);
+        $response = Response::createFromRequest($request);
+
+        foreach ($middleware as $class) {
+            $action = fn ($request) => new $class($request, $response, $action);
+
+            if ($action instanceof Response) {
+                break;
+            }
+        }
+
+        return $action($request);
     }
 
     public function prepareEnvironment()

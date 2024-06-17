@@ -15,7 +15,7 @@
     <?= viewMeta()->output('rawScripts') ?>
 </head>
 
-<body>
+<body hx-headers="{'X-Tracy-Ajax': Tracy.getAjaxHeader() }">
     <div class="main">
         <x-navbar>
             <ul class="nav">
