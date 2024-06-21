@@ -41,39 +41,35 @@ class App
      */
     public function run()
     {
-        try {
-            $this->prepareEnvironment();
+        $this->prepareEnvironment();
 
-            ob_start();
+        ob_start();
 
-            // Get the control file, if exists
-            $router = new Router();
-            $router->setBasePath(ROOTPATH .'routes');
-            $route = $router->getRouteForRequest($this->request);
+        // Get the control file, if exists
+        $router = new Router();
+        $router->setBasePath(ROOTPATH .'routes');
+        $route = $router->getRouteForRequest($this->request);
 
-            /** @var object */
-            $control = $route->controlFile !== '' ? include $route->controlFile : null;
+        /** @var object */
+        $control = $route->controlFile !== '' ? include $route->controlFile : null;
 
-            $action = fn (Request $request, Response $response) => $router->display(
-                request: $request,
-                control: $control,
-                route: $route
-            );
+        $action = fn (Request $request, Response $response) => $router->display(
+            request: $request,
+            control: $control,
+            route: $route
+        );
 
-            // Run the middleware
-            $request = $this->request;
-            $response = Response::createFromRequest($request);
-            $html =  Middleware::forRequest($request)
+        // Run the middleware
+        $request = $this->request;
+        $response = Response::createFromRequest($request);
+        $html =  Middleware::forRequest($request)
                 ->forControl($control)
                 ->process($request, $response, $action);
 
-            $response->withBody($html);
-            $response->withBody($this->replacePerformanceMarkers($response->body()));
+        $response->withBody($html);
+        $response->withBody($this->replacePerformanceMarkers($response->body()));
 
-            return $response->send();
-        } catch (Throwable $e) {
-            return $this->handleException($e);
-        }
+        return $response->send();
     }
 
     public function processMiddleware(Request $request, Response $response, array $middleware)
@@ -137,28 +133,5 @@ class App
         $output = str_replace('{memory_usage}', "{$currentMemory}/{$peakMemory}", $output);
 
         return $output;
-    }
-
-    private function handleException(Throwable $e)
-    {
-        if (ENVIRONMENT === 'testing') {
-            throw $e;
-        }
-
-        $type = $e::class;
-        $message = $e->getMessage();
-        $code = $e->getCode();
-        $file = $e->getFile();
-        $line = $e->getLine();
-        $trace = $e->getTraceAsString();
-
-        // TODO - Log the error
-        // TODO - Used per-environment error pages
-        // TODO - Hande HTTP status codes
-        ob_start();
-        include ROOTPATH .'routes/+error.php';
-        echo ob_get_clean() ?? '';
-
-        exit(1);
     }
 }

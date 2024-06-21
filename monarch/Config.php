@@ -59,6 +59,10 @@ class Config
             $this->files[$file] = include $path;
         }
 
+        if (count($keys) === 0) {
+            return $this->files[$file] ?? null;
+        }
+
         return dot_array_search(implode('.', $keys), $this->files[$file]);
     }
 }

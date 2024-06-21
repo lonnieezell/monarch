@@ -12,12 +12,14 @@ class Debugger
 {
     public function handle(Request $request, Response $response, Closure $next)
     {
-        // Attach Tracy to the end of the content if it's enabled
+        // Ensure Tracy can track AJAX requests
         if (DEBUG && $request->isHtmx()) {
             TracyDebugger::dispatch();
             $response->withHeader(new Header('X-Tracy-Ajax', '1'));
         }
 
-        return $next($request, $response);
+        $html = $next($request, $response);
+
+        return $html;
     }
 }

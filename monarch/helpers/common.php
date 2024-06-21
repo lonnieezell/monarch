@@ -126,7 +126,7 @@ if (! function_exists('dot_array_search')) {
  * @return array|false|string|null
  */
 if (! function_exists('env')) {
-    function env(string $key, ?string $default)
+    function env(string $key, ?string $default = null)
     {
         $value = getenv($key);
 

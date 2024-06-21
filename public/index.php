@@ -1,6 +1,7 @@
 <?php
 
 use Monarch\App;
+use Monarch\Debug;
 use Tracy\Debugger;
 
 // Hook up Composer
@@ -22,9 +23,6 @@ if (! defined('DEBUG')) {
     define('DEBUG', (bool)getenv('DEBUG'));
 }
 
-// Setup Tracy Debugger
-if (getenv('DEBUG')) {
-    Debugger::enable(Debugger::Development);
-}
+Debug::startTracy();
 
 echo $app->run();
