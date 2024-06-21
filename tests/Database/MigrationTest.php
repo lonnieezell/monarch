@@ -11,7 +11,6 @@ describe('Migrations', function () {
         db()->dropTable('migrations');
         db()->dropTable('users');
         db()->dropTable('posts');
-        ;
     });
 
     it('should run all pending migrations recursively', function () {

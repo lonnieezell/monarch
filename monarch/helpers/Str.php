@@ -11,6 +11,9 @@ class Str
      */
     public static function pascal(string $string): string
     {
+        // Insert hyphen before capital letters inside string
+        $string = preg_replace('/([a-z])([A-Z])/', '$1-$2', $string);
+
         return str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', mb_strtolower($string))));
     }
 
@@ -19,6 +22,9 @@ class Str
      */
     public static function camel(string $string): string
     {
+        // Insert hyphen before capital letters inside string
+        $string = preg_replace('/([a-z])([A-Z])/', '$1-$2', $string);
+
         return str_replace(' ', '', lcfirst(ucwords(str_replace(['-', '_'], ' ', mb_strtolower($string)))));
     }
 
@@ -27,6 +33,9 @@ class Str
      */
     public static function kebab(string $string): string
     {
+        // Insert hyphen before capital letters inside string
+        $string = preg_replace('/([a-z])([A-Z])/', '$1-$2', $string);
+
         return str_replace([' ', '_'], '-', mb_strtolower($string));
     }
 
@@ -35,6 +44,9 @@ class Str
      */
     public static function snake(string $string): string
     {
+        // Insert hyphen before capital letters inside string
+        $string = preg_replace('/([a-z])([A-Z])/', '$1-$2', $string);
+
         return str_replace(' ', '_', str_replace([' ', '-'], ' ', mb_strtolower($string)));
     }
 
@@ -43,6 +55,9 @@ class Str
      */
     public static function title(string $string): string
     {
+        // Insert hyphen before capital letters inside string
+        $string = preg_replace('/([a-z])([A-Z])/', '$1-$2', $string);
+
         return ucwords(str_replace(['-', '_'], ' ', mb_strtolower($string)));
     }
 
@@ -117,7 +132,20 @@ class Str
     public static function like(string $str, string $pattern): bool
     {
         $pattern = mb_strtolower($pattern);
-        $pattern = str_replace('%', '.*', preg_quote($pattern, '/'));
+
+        // Asterisks are translated into zero-or-more regular expression wildcards
+        if (mb_strpos($pattern, '*') !== false) {
+            $pattern = str_replace('*', '.*', $pattern);
+        }
+
+        // Question marks are translated into zero-or-one regular expression wildcards
+        if (mb_strpos($pattern, '?') !== false) {
+            $pattern = str_replace('?', '.', $pattern);
+        }
+        // Percent signs are translated into zero-or-more regular expression wildcards
+        if (mb_strpos($pattern, '%') !== false) {
+            $pattern = str_replace('%', '.*', preg_quote($pattern, '/'));
+        }
 
         return (bool) preg_match('/^' . $pattern . '\z/', $str);
     }
@@ -141,7 +169,9 @@ class Str
      */
     public static function random(int $length = 16): string
     {
-        return bin2hex(random_bytes($length));
+        $str = bin2hex(random_bytes(ceil($length / 2)));
+
+        return substr($str, 0, $length);
     }
 
     /**

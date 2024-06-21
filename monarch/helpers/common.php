@@ -1,25 +1,8 @@
 <?php
 
-use Kint\Kint;
-use Kint\Renderer\RichRenderer;
 use Monarch\View\Meta;
 use Monarch\Config;
 use Monarch\Database\Connection;
-
-/**
- * Setup Kint
- */
-Kint::$aliases[] = 'dd';
-Kint::$expanded = true;
-RichRenderer::$theme = 'aante-light.css';
-
-if (! function_exists('dd')) {
-    function dd(...$vars): never
-    {
-        Kint::dump(...$vars);
-        exit;
-    }
-}
 
 /**
  * Retrieves a key from config files.
@@ -143,7 +126,7 @@ if (! function_exists('dot_array_search')) {
  * @return array|false|string|null
  */
 if (! function_exists('env')) {
-    function env(string $key, ?string $default)
+    function env(string $key, ?string $default = null)
     {
         $value = getenv($key);
 

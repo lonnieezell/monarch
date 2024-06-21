@@ -100,6 +100,25 @@ Str::containsAll('foo_bar', ['foo', 'bar']);
 // true
 ```
 
+### `like(string $pattern, string $value): bool`
+
+Check if the given string matches the given pattern. The pattern can contain the following wildcards:
+
+- `%` matches zero or more characters
+- `*` matches zero or more characters
+- '?' matches a single character
+
+It returns a boolean value indicating whether the string matches the pattern.
+
+```php
+use Monarch\Helpers\Str;
+
+Str::like('foo*', 'foobar');
+
+// true
+```
+
+
 ### `length(string $value): int`
 
 Get the length of the given string.

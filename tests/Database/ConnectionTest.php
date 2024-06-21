@@ -91,30 +91,22 @@ describe('Database Connection', function () {
     });
 
     test('run query', function () {
-        $config = config('database.'. config('database.default'));
-        $connection = Connection::createWithConfig($config);
+        db()->dropTable('users');
+        db()->run('CREATE TABLE users (id INT PRIMARY KEY AUTO_INCREMENT, name TEXT)');
+        db()->run('INSERT INTO users (name) VALUES (?)', ['foo']);
+        db()->run('INSERT INTO users (name) VALUES (?)', ['bar']);
 
-        $connection->run('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)');
-        $connection->run('INSERT INTO users (name) VALUES (?)', ['foo']);
-        $connection->run('INSERT INTO users (name) VALUES (?)', ['bar']);
-
-        $users = $connection->run('SELECT * FROM users')->fetchAll();
+        $users = db()->run('SELECT * FROM users')->fetchAll();
         expect($users)->toHaveCount(2);
-
-        $connection->dropTable('users');
     });
 
     test('run query with QueryBuilder', function () {
-        $config = config('database.'. config('database.default'));
-        $connection = Connection::createWithConfig($config);
+        db()->dropTable('users');
+        db()->run('CREATE TABLE users (id INT PRIMARY KEY AUTO_INCREMENT, name TEXT)');
+        db()->run('INSERT INTO users (name) VALUES (?)', ['foo']);
+        db()->run('INSERT INTO users (name) VALUES (?)', ['bar']);
 
-        $connection->run('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)');
-        $connection->run('INSERT INTO users (name) VALUES (?)', ['foo']);
-        $connection->run('INSERT INTO users (name) VALUES (?)', ['bar']);
-
-        $users = $connection->sql('SELECT * FROM users')->run()->fetchAll();
+        $users = db()->sql('SELECT * FROM users')->run()->fetchAll();
         expect($users)->toHaveCount(2);
-
-        $connection->dropTable('users');
     });
 });

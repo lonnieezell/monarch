@@ -1,6 +1,8 @@
 <?php
 
 use Monarch\App;
+use Monarch\Debug;
+use Tracy\Debugger;
 
 // Hook up Composer
 include_once '../vendor/autoload.php';
@@ -14,4 +16,13 @@ define('TESTPATH', realpath(ROOTPATH.'tests') .'/');
 define('MONARCHPATH', realpath(ROOTPATH.'monarch') .'/');
 define('WRITEPATH', realpath(ROOTPATH.'writable') .'/');
 
-echo App::createFromGlobals()->run();
+$app = App::createFromGlobals();
+$app->prepareEnvironment();
+
+if (! defined('DEBUG')) {
+    define('DEBUG', (bool)getenv('DEBUG'));
+}
+
+Debug::startTracy();
+
+echo $app->run();

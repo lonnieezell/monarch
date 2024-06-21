@@ -3,7 +3,6 @@
 use Monarch\HTTP\Middleware;
 use Monarch\HTTP\Request;
 
-
 beforeEach(function () {
     $this->request = Request::createFromArray([
         'method' => 'GET',
@@ -13,50 +12,35 @@ beforeEach(function () {
     ]);
 });
 
-describe('Middleware', function () {
-    it('should return the default middleware if no control file is provided', function () {
-        $middleware = Middleware::forRequest($this->request)->forControl();
+it('should process the middleware classes', function () {
+    $middleware = Middleware::forRequest($this->request)
+        ->process($this->request, new Monarch\HTTP\Response(), function ($request, $response) {
+            return $response->withStatus(201)->withBody('Hello, world!');
+        });
 
-        expect($middleware)->toBeArray();
-        expect($middleware)->toMatchArray(config('middleware.web'));
-    });
+    expect($middleware)->toBeInstanceOf(Monarch\HTTP\Response::class);
+    expect($middleware->status())->toBe(201);
+});
 
-    it('should return the default middleware if the control file does not have a middleware method', function () {
-        $control = new class () {
-            //
-        };
+it('should process the middleware classes with a control', function () {
+    $control = new class () {
+        public function middleware($method)
+        {
+            return [
+                Tests\_support\Middleware\BodyPrinter::class,
+            ];
+        }
+    };
 
-        $middleware = Middleware::forRequest($this->request)->forControl($control);
+    $middleware = Middleware::forRequest($this->request)
+        ->forControl($control)
+        ->process($this->request, new Monarch\HTTP\Response(), function ($request, $response) {
+            return $response->withStatus(201);
+        });
 
-        expect($middleware)->toBeArray();
-        expect($middleware)->toMatchArray(config('middleware.web'));
-    });
-
-    it('should return the default middleware if the control file does not return a middleware group name', function () {
-        $control = new class () {
-            function middleware(string $method) : string|array
-            {
-                return '';
-            }
-        };
-
-        $middleware = Middleware::forRequest($this->request)->forControl($control);
-
-        expect($middleware)->toBeArray();
-        expect($middleware)->toMatchArray(config('middleware.web'));
-    });
-
-    it('should return the middleware for the given group name', function () {
-        $control = new class () {
-            function middleware(string $method) : string|array
-            {
-                return 'api';
-            }
-        };
-
-        $middleware = Middleware::forRequest($this->request)->forControl($control);
-
-        expect($middleware)->toBeArray();
-        expect($middleware)->toMatchArray(config('middleware.api'));
-    });
+    expect($middleware)->toBeInstanceOf(Monarch\HTTP\Response::class);
+    // Initial response should update the status.
+    expect($middleware->status())->toBe(201);
+    // The middleware should update the body.
+    expect($middleware->body())->toBe('Hello, world!');
 });

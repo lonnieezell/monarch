@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Monarch\View\Renderers;
 
-use Monarch\Components\ComponentManager;
 use Monarch\Components\HasComponents;
-use Monarch\Components\TagParser;
 use Monarch\HTTP\Request;
 use Monarch\View\HasLayouts;
 use Monarch\View\RendererInterface;
-use RuntimeException;
+use Tracy\Debugger;
 
 class HTMLRenderer implements RendererInterface
 {

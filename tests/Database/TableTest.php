@@ -4,6 +4,7 @@ use Monarch\Database\Connection;
 use Monarch\Helpers\Str;
 
 beforeEach(function () {
+    db()->dropTable('migrations');
     db()->dropTable('users');
     db()->dropTable('posts');
 });
@@ -17,7 +18,10 @@ describe('Database Tables', function () {
     });
 
     test('can list tables with no tables', function () {
-        expect(db()->tables())->toBeArray()->toBeEmpty();
+        $tables = db()->tables();
+
+        expect($tables)->toBeArray();
+        expect($tables)->toBeEmpty();
     });
 
     test('can list tables', function () {

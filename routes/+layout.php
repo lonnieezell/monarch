@@ -10,12 +10,12 @@
 
     <link href="/css/vendor/bootstrap-5.3.min.css" rel="stylesheet">
     <?= viewMeta()->output('styles') ?>
-    <script src="/js/vendor/htmx-1.9.11.min.js"></script>
+    <script src="/js/vendor/htmx-2.0.0.min.js"></script>
     <?= viewMeta()->output('scripts') ?>
     <?= viewMeta()->output('rawScripts') ?>
 </head>
 
-<body>
+<body hx-headers="{'X-Tracy-Ajax': Tracy.getAjaxHeader() }">
     <div class="main">
         <x-navbar>
             <ul class="nav">
