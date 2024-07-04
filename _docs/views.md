@@ -171,3 +171,53 @@ Monarch provides a helper function to make it a little nicer to get the ViewMeta
 viewMeta()->addMeta(['description', 'Monarch is a simple and flexible PHP framework.']);
 viewMeta()->output('meta');
 ```
+
+## Escaping User Content
+
+When displaying user-generated content, it is important to escape the content to prevent Cross-Site Scripting (XSS) attacks. Monarch provides several helper functions to escape user-contributed content in a context-aware manner. This is a thin wrapper around the excellent [Laminas Escaper](https://docs.laminas.dev/laminas-escaper/) library.
+
+### Escaping HTML
+
+The `escapeHtml()` function escapes general text being output within the HTML body.
+
+```php
+<?= escapeHtml('<script>alert("Hello, World!");</script>') ?>
+```
+
+### Escaping HTML Attributes
+
+The `escapeHtmlAttr()` function escapes text that is being output as an HTML attribute.
+
+```php
+<div data-foo="<?= escapeHtmlAttr('<script>alert("Hello, World!");</script>') ?>"></div>
+```
+
+### Escaping JavaScript
+
+The `escapeJs()` function escapes text that is being output within a `<script>` tag.
+
+```php
+<script>
+    var foo = <?= escapeJs($foo) ?>;
+</script>
+```
+
+### Escaping CSS
+
+The `escapeCss()` function escapes text that is being output within a `<style>` tag.
+
+```php
+<style>
+    body {
+        color: <?= escapeCss('red') ?>;
+    }
+</style>
+```
+
+### Escaping URLs
+
+The `escapeUrl()` function escapes text that is being output as part of a URL. It is not necessary to escape the entire URL, only the parts that are user-contributed.
+
+```php
+<a href="http://example.com/?q=<?= escapeUrl($query) ?>">Link</a>
+```

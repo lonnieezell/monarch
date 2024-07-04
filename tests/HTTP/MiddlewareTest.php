@@ -1,6 +1,8 @@
 <?php
 
 use Monarch\HTTP\Middleware;
+use \Tests\_support\Middleware\BodyPrinter;
+use \Monarch\HTTP\Response;
 use Monarch\HTTP\Request;
 
 beforeEach(function () {
@@ -24,7 +26,7 @@ it('should process the middleware classes', function () {
 
 it('should process the middleware classes with a control', function () {
     $control = new class () {
-        public function middleware($method)
+        function middleware($method)
         {
             return [
                 Tests\_support\Middleware\BodyPrinter::class,

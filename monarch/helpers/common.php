@@ -3,6 +3,7 @@
 use Monarch\View\Meta;
 use Monarch\Config;
 use Monarch\Database\Connection;
+use Monarch\View\Escaper;
 
 /**
  * Retrieves a key from config files.
@@ -133,6 +134,92 @@ if (! function_exists('env')) {
         return $value !== false
         ? $value
         : $default;
+    }
+}
+
+/**
+ * Escapes a string for HTML output
+ *
+ * Used when outputting user-contributed content to the
+ * HTML body of a page.
+ *
+ * Example:
+ *  <?= escapeHtml($userInput) ?>
+ */
+if (! function_exists('escapeHtml')) {
+    function escapeHtml(string $string): string
+    {
+        return Escaper::instance()->escapeHtml($string);
+    }
+}
+
+/**
+ * Escapes a string for HTML attribute output
+ *
+ * Used when outputting user-contributed content to an
+ * on attribute value of an HTML element.
+ *
+ * Example:
+ * <input type="text" value="<?= escapeHtmlAttr($userInput) ?>">
+ */
+if (! function_exists('escapeHtmlAttr')) {
+    function escapeHtmlAttr(string $string): string
+    {
+        return Escaper::instance()->escapeHtmlAttr($string);
+    }
+}
+
+/**
+ * Escapes a string for JavaScript output
+ *
+ * Used when outputting user-contributed content within
+ * a <script> body.
+ *
+ * Example:
+ * <script>
+ *   var userInput = "<?= escapeJs($userInput) ?>";
+ * </script>
+ */
+if (! function_exists('escapeJs')) {
+    function escapeJs(string $string): string
+    {
+        return Escaper::instance()->escapeJs($string);
+    }
+}
+
+/**
+ * Escapes a string for CSS output
+ *
+ * Used when outputting user-contributed content within
+ * a <style> tag.
+ *
+ * Example:
+ * <style>
+ *  .user-input {
+ *     content: "<?= escapeCss($userInput) ?>";
+ * }
+ * </style>
+ */
+if (! function_exists('escapeCss')) {
+    function escapeCss(string $string): string
+    {
+        return Escaper::instance()->escapeCss($string);
+    }
+}
+
+/**
+ * Escapes a string for URL output
+ *
+ * Used when outputting user-contributed content within
+ * a URL.
+ *
+ * Example:
+ * <a href="<?= escapeUrl($url) ?>">Link</a>
+ */
+if (! function_exists('escapeUrl')) {
+    function escapeUrl(string $string): string
+    {
+        return Escaper::instance()->escapeUrl($string);
     }
 }
 
