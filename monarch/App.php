@@ -42,6 +42,7 @@ class App
     public function run()
     {
         $this->prepareEnvironment();
+        $this->setupSession();
 
         ob_start();
 
@@ -133,5 +134,17 @@ class App
         $output = str_replace('{memory_usage}', "{$currentMemory}/{$peakMemory}", $output);
 
         return $output;
+    }
+
+    private function setupSession()
+    {
+        $handler = config('app.sessionHandler');
+        $savePath = config('app.sessionSavePath');
+
+        ini_set('session.save_handler', $handler);
+
+        if ($handler !== 'files') {
+            ini_set('session.save_path', $savePath);
+        }
     }
 }

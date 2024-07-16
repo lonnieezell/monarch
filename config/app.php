@@ -26,4 +26,18 @@ return [
     | Default: UTF-8
     */
     'outputEncoding' => 'UTF-8',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Session Handler
+    |--------------------------------------------------------------------------
+    |
+    | Sets the session handler to use for the application. This can be set to
+    | 'files', 'sqlite', or 'redis' to use the respective session handlers.
+    | For sqlite or redis to work, the respective extensions must be installed.
+    |
+    | Default: 'files'
+    */
+    'sessionHandler' => env('SESSION_HANDLER', 'files'),
+    'sessionSavePath' => env('SESSION_SAVE_PATH', null),
 ];

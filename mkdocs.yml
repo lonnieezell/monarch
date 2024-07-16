@@ -56,6 +56,8 @@ nav:
     - Middleware: middleware.md
     - Views: views.md
     - Components: view_components.md
+    - Sessions: sessions.md
+    - CSRF Protection: csrf_protection.md
     - Database:
         - Getting Started: database/connections.md
         - Running Queries: database/queries.md
