@@ -38,6 +38,10 @@ class Request
         $request->method = strtoupper((string) $_SERVER['REQUEST_METHOD']);
         $request->query = $_GET;
 
+        if ($request->method === 'POST' && ! empty($_POST)) {
+            $request->body = $_POST;
+        }
+
         $uriParts = parse_url((string) $request->uri);
         $request->scheme = $uriParts['scheme'] ?? 'http';
         $request->host = $uriParts['host'] ?? '';

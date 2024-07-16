@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 use Monarch\View\Meta;
 use Monarch\Config;
 use Monarch\Database\Connection;
+use Monarch\HTTP\CSRF;
 use Monarch\View\Escaper;
 
 /**
@@ -25,6 +28,32 @@ if (! function_exists('config')) {
     function config(string $key)
     {
         return Config::factory()->get($key);
+    }
+}
+
+/**
+ * Generates a CSRF token
+ *
+ * You can lock the token to a the current URI path by passing
+ * true as the first argument.
+ */
+if (! function_exists('csrfInput')) {
+    function csrfInput(bool $lock = false): string
+    {
+        return CSRF::input($lock);
+    }
+}
+
+/**
+ * Generates a CSRF token
+ *
+ * You can lock the token to a the current URI path by passing
+ * true as the first argument.
+ */
+if (! function_exists('csrf')) {
+    function csrf(bool $lock = false): string
+    {
+        return CSRF::token($lock);
     }
 }
 

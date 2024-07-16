@@ -8,6 +8,7 @@ return [
     // The middleware classes to run through
     // for standard 'web' requests.
     'web' => [
+        \Monarch\HTTP\Middleware\Security::class,
         \Monarch\HTTP\Middleware\Debugger::class,
     ],
 
