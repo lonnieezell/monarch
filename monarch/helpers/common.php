@@ -6,6 +6,7 @@ use Monarch\View\Meta;
 use Monarch\Config;
 use Monarch\Database\Connection;
 use Monarch\HTTP\CSRF;
+use Monarch\HTTP\Response;
 use Monarch\View\Escaper;
 
 /**
@@ -249,6 +250,19 @@ if (! function_exists('escapeUrl')) {
     function escapeUrl(string $string): string
     {
         return Escaper::instance()->escapeUrl($string);
+    }
+}
+
+/**
+ * Gets the Response instance.
+ *
+ * Example:
+ *  response()->withBody('Hello, World!')->send();
+ */
+if (! function_exists('response')) {
+    function response(): Response
+    {
+        return Response::instance();
     }
 }
 

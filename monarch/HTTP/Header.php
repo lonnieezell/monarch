@@ -8,7 +8,5 @@ class Header
         public readonly string $name,
         public readonly string|array $value
     ) {
-        $this->name = $name;
-        $this->value = $value;
     }
 }

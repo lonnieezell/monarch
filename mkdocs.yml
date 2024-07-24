@@ -52,12 +52,15 @@ extra_javascript:
 
 nav:
     - Home: index.md
-    - Routes: routes.md
-    - Middleware: middleware.md
-    - Views: views.md
-    - Components: view_components.md
-    - Sessions: sessions.md
-    - CSRF Protection: csrf_protection.md
+    - Core Concepts:
+        - Routes: core/routes.md
+        - Views: core/views.md
+        - Responses: core/responses.md
+    - Dig Deeper:
+        - Middleware: middleware.md
+        - Components: view_components.md
+        - Sessions: sessions.md
+        - CSRF Protection: csrf_protection.md
     - Database:
         - Getting Started: database/connections.md
         - Running Queries: database/queries.md

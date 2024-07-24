@@ -7,21 +7,41 @@ use Monarch\HTTP\Request;
 
 class Response
 {
-    private int $status;
-    private string|array $body;
+    private static Response $instance;
+
+    private int $status = 200;
+    private string|array $body = '';
     private array $headers = [];
     private array $cookies = [];
+    private array $swaps = [];
 
     /**
      * Creates a new Response instance from a Request instance.
+     *
+     * @TODO This needs to grab relevant info from the request.
      */
     public static function createFromRequest(Request $request): Response
     {
         $response = new static();
-
         $response->status = 200;
 
-        return $response;
+        self::$instance = $response;
+
+        return self::$instance;
+    }
+
+    /**
+     * Returns the singleton instance of the Response class.
+     *
+     * @return Response
+     */
+    public static function instance(): Response
+    {
+        if (!isset(self::$instance)) {
+            self::$instance = new static();
+        }
+
+        return self::$instance;
     }
 
     /**
@@ -79,6 +99,16 @@ class Response
     }
 
     /**
+     * Replaces a header in the response.
+     */
+    public function replaceHeader(Header $value): static
+    {
+        $this->forgetHeader($value->name);
+
+        return $this->withHeader($value);
+    }
+
+    /**
      * Removes a header from the response.
      */
     public function forgetHeader(string $name): static
@@ -105,6 +135,8 @@ class Response
      */
     public function withCookie(Cookie $value): static
     {
+        $this->forgetCookie($value->name);
+
         $this->cookies[] = $value;
 
         return $this;
@@ -120,6 +152,30 @@ class Response
                 unset($this->cookies[$key]);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * Adds an OOB swap to the response.
+     * The $id is any unique identifier for the swap, often the id of the tag.
+     * The $value is the value to swap in.
+     *
+     * @see https://htmx.org/docs/#oob_swaps
+     */
+    public function withSwap(string $id, string $value): static
+    {
+        $this->swaps[$id] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Removes a swap from the response, if it exists.
+     */
+    public function forgetSwap(string $id): static
+    {
+        unset($this->swaps[$id]);
 
         return $this;
     }
@@ -155,7 +211,33 @@ class Response
             );
         }
 
+        $body = $this->addSwaps();
+
         // echo the body out
-        return $this->body;
+        return $body;
+    }
+
+    /**
+     * Adds the OOB swaps to the response body.
+     * If the body is an array, it will be ignored.
+     * If the closing </body> tag is found within the body,
+     * the swaps will be added before it.
+     */
+    private function addSwaps(): string|array
+    {
+        if (is_array($this->body) || empty($this->swaps)) {
+            return $this->body;
+        }
+
+        $body = $this->body;
+        $swaps = implode("\n", $this->swaps);
+
+        if (strpos($body, '</body>') !== false) {
+            $body = str_replace('</body>', "\n". $swaps.'</body>', $body);
+        } else {
+            $body .= "\n". $swaps;
+        }
+
+        return $body;
     }
 }
