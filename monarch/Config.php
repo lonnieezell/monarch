@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Monarch;
 
+use Monarch\Helpers\Arr;
 use RuntimeException;
 
 /**
@@ -63,7 +64,7 @@ class Config
             return $this->files[$file] ?? null;
         }
 
-        return dot_array_search(implode('.', $keys), $this->files[$file]);
+        return Arr::get($this->files[$file], implode('.', $keys));
     }
 
     /**
