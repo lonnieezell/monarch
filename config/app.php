@@ -40,4 +40,22 @@ return [
     */
     'sessionHandler' => env('SESSION_HANDLER', 'files'),
     'sessionSavePath' => env('SESSION_SAVE_PATH', null),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Validation Rules
+    |--------------------------------------------------------------------------
+    |
+    | A list of validation rule classes to register with the validation factory.
+    |
+    | Default: []
+    |
+    | Example:
+    | 'rules' => [
+    |     'uuid' => \Somnambulist\Components\Validation\Rules\Uuid::class,
+    | ]
+    */
+    'validationRules' => [
+        //
+    ],
 ];

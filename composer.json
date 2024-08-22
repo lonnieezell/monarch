@@ -14,6 +14,7 @@
         "php": ">=8.2",
         "laminas/laminas-escaper": "^2.13",
         "league/commonmark": "^2.4",
+        "somnambulist/validation": "^1.12",
         "symfony/yaml": "^7.0",
         "tracy/tracy": "^2.10"
     },
@@ -31,7 +32,8 @@
     "autoload": {
         "psr-4": {
             "Monarch\\": "monarch/",
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "Tests\\Support\\": "tests/_support/"
         }
     },
     "config": {

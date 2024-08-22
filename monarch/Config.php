@@ -65,4 +65,30 @@ class Config
 
         return dot_array_search(implode('.', $keys), $this->files[$file]);
     }
+
+    /**
+     * Allows for mocking of config files during testing.
+     */
+    public function mock(string $file, array $data)
+    {
+        // If the first key is numeric, we're replacing the entire file.
+        if (is_numeric(array_key_first($data))) {
+            $this->files[$file] = $data;
+            return;
+        }
+
+        // Otherwise we're just replacing the given key(s)
+        // in the original config file.
+        if (! isset($this->files[$file])) {
+            $path = ROOTPATH ."config/{$file}.php";
+
+            if (! file_exists($path)) {
+                throw new RuntimeException('Config file not found: '. $path);
+            }
+
+            $this->files[$file] = include $path;
+        }
+
+        $this->files[$file] = array_merge($this->files[$file], $data);
+    }
 }

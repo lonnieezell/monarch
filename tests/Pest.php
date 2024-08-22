@@ -38,7 +38,6 @@ uses(TestCase::class)
             define('WRITEPATH', realpath(ROOTPATH.'writable') .'/');
         }
 
-
         $app = App::createFromGlobals();
         $app->prepareEnvironment();
     })

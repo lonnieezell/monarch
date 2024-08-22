@@ -7,7 +7,9 @@ use Monarch\Config;
 use Monarch\Database\Connection;
 use Monarch\HTTP\CSRF;
 use Monarch\HTTP\Response;
+use Monarch\Validation\Validation;
 use Monarch\View\Escaper;
+use Somnambulist\Components\Validation\Factory;
 
 /**
  * Retrieves a key from config files.
@@ -23,12 +25,14 @@ use Monarch\View\Escaper;
  *
  * @param string $key
  *
- * @return mixed
+ * @return mixed|Config instance
  */
 if (! function_exists('config')) {
-    function config(string $key)
+    function config(?string $key=null): mixed
     {
-        return Config::factory()->get($key);
+        return $key === null
+            ? Config::factory()
+            : Config::factory()->get($key);
     }
 }
 
@@ -263,6 +267,16 @@ if (! function_exists('response')) {
     function response(): Response
     {
         return Response::instance();
+    }
+}
+
+/**
+ * Gets the Validation\Factory instance.
+ */
+if (! function_exists('validation')) {
+    function validation(): Factory
+    {
+        return Validation::instance();
     }
 }
 

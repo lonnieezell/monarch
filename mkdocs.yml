@@ -56,11 +56,12 @@ nav:
         - Routes: core/routes.md
         - Views: core/views.md
         - Responses: core/responses.md
-    - Dig Deeper:
-        - Middleware: middleware.md
-        - Components: view_components.md
-        - Sessions: sessions.md
-        - CSRF Protection: csrf_protection.md
+    - Using Monarch:
+        - Middleware: using-monarch/middleware.md
+        - Components: using-monarch/view_components.md
+        - Sessions: using-monarch/sessions.md
+        - CSRF Protection: using-monarch/csrf_protection.md
+        - Validation: using-monarch/validation.md
     - Database:
         - Getting Started: database/connections.md
         - Running Queries: database/queries.md
