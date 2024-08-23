@@ -4,6 +4,7 @@ namespace Monarch\Components;
 
 use Exception;
 use Monarch\Helpers\Files;
+use RuntimeException;
 
 /**
  * The ComponentManager class is responsible for managing components
@@ -86,20 +87,23 @@ class ComponentManager
             throw new Exception("Component $tagName not registered.");
         }
 
+        // Make the attributes available to the component
+        $attributes = new Attributes($rawAttributes);
+
         // Check for a control file for this component
         $controlFile = $this->components[$tagName] . '.control';
         $control = file_exists($controlFile) ? include $controlFile : null;
 
+        if (!is_null($control) && (!is_object($control) || !$class instanceof Component)) {
+            throw new RuntimeException("Control file for $tagName is not a valid component.");
+        }
+
         if ($control) {
-            $control->withRouteParams($content, $rawAttributes);
+            $control->withRouteParams($content, $attributes);
             return $control->render();
         }
 
         // Otherwise, render the component view directly
-
-        // Make the attributes available to the component
-        $attributes = new Attributes($rawAttributes);
-
         ob_start();
         include $this->components[$tagName];
         $component = ob_get_clean();

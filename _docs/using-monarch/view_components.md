@@ -186,3 +186,57 @@ You can then use the component like this:
 ```
 
 ## Controlled Components
+
+Controlled components are used when you need more logic, or access to more of the framework, than a simple component provides. They are similar to controllers in that they are responsible for managing their own state and rendering the UI based on that state.
+
+### Creating a Controlled Component
+
+Controlled components are PHP classes that extend the `Component` class. They should be located in the `app/components` directory and have a name that matches the desired tag name, and have the `.control.php` extension. You will typically have a corresponding view file with the same name as the component, though it is not required.
+
+For example, to create a controlled component that renders a form, you would create a file named `app/components/form.control.php` with content similar to this:
+
+```php
+<?php
+
+use Monarch\Components\Component;
+
+return new class() extends Component
+{
+    public $name;
+
+    public function render(): string
+    {
+        return $this->view('form', ['name' => $this->name]);
+    }
+}
+```
+
+You are required to implement the `render()` method which must return a string. Other than that, you are free to add any additional methods or properties to the class as needed.
+
+The class provides a `view()` method that returns a simple component view like was described earlier in this document. It automatically makes the `$attributes` object available to the view, and handles parsing any slots. In this case, the `form` view file would be located at `app/Components/form.php`.
+
+### Using a Controlled Component
+
+Controlled Components are called exactly like simple components, but the control file's `render` method is called instead of the component file's content being returned.
+
+```html
+<x-form name="contact">
+    <x-slot></x-slot>
+</x-form>
+```
+
+Within the component's control file, you can access the attributes and slots using the `$this->attributes` instance.
+
+```php
+<?php
+
+use Monarch\Components\Component;
+
+return new class() extends Component
+{
+    public function render(): string
+    {
+        return $this->view('form', ['name' => $this->attributes->get('name')]);
+    }
+}
+```
