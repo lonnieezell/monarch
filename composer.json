@@ -16,7 +16,6 @@
         "league/commonmark": "^2.4",
         "somnambulist/validation": "^1.12",
         "symfony/yaml": "^7.0",
-        "tracy/tracy": "^2.10"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.49",

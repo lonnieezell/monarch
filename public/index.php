@@ -2,7 +2,6 @@
 
 use Monarch\App;
 use Monarch\Debug;
-use Tracy\Debugger;
 
 // Hook up Composer
 include_once '../vendor/autoload.php';
@@ -23,6 +22,6 @@ if (! defined('DEBUG')) {
     define('DEBUG', (bool)getenv('DEBUG'));
 }
 
-Debug::startTracy();
+// Debug::startTracy();
 
 echo $app->run();

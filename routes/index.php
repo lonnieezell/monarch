@@ -1,4 +1,7 @@
 <?php
+
+use Monarch\Debug;
+
     viewMeta()
         ->setTitle('Welcome to the Monarch Framework')
         ->addMeta([

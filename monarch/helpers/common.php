@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Monarch\View\Meta;
 use Monarch\Config;
 use Monarch\Database\Connection;
+use Monarch\Debug;
 use Monarch\HTTP\CSRF;
 use Monarch\HTTP\Response;
 use Monarch\Validation\Validation;
@@ -79,6 +80,13 @@ if (! function_exists('db')) {
         $config = config('database.' . $connectionName);
 
         return Connection::createWithConfig($config);
+    }
+}
+
+if (! function_exists('debug')) {
+    function debug(): Debug
+    {
+        return Debug::instance();
     }
 }
 
