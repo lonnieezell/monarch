@@ -14,12 +14,12 @@
         "php": ">=8.2",
         "laminas/laminas-escaper": "^2.13",
         "league/commonmark": "^2.4",
+        "phpoption/phpoption": "^1.9",
         "somnambulist/validation": "^1.12",
-        "symfony/yaml": "^7.0",
+        "symfony/yaml": "^7.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.49",
-        "kint-php/kint": "^3.3",
         "mockery/mockery": "^1.6",
         "pestphp/pest": "^2.34",
         "pestphp/pest-plugin-drift": "^2.5",

@@ -155,6 +155,14 @@ class Request
     }
 
     /**
+     * Returns an array of all headers.
+     */
+    public function headers(): array
+    {
+        return $this->headers;
+    }
+
+    /**
      * Returns a boolean value indicating whether the request
      * was initiated by an htmx request.
      */

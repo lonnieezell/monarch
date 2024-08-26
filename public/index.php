@@ -1,7 +1,7 @@
 <?php
 
 use Monarch\App;
-use Monarch\Debug;
+use Monarch\Debug\Net;
 
 // Hook up Composer
 include_once '../vendor/autoload.php';
@@ -22,6 +22,6 @@ if (! defined('DEBUG')) {
     define('DEBUG', (bool)getenv('DEBUG'));
 }
 
-// Debug::startTracy();
+(new Net())->register(DEBUG);
 
 echo $app->run();
