@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Monarch;
 
-use Monarch\Helpers\Numbers;
+use Monarch\Debug\Info;
 use Monarch\HTTP\Middleware;
 use Monarch\HTTP\Request;
 use Monarch\HTTP\Response;
 use Monarch\Routes\Router;
-use Throwable;
 
 class App
 {
@@ -60,6 +59,12 @@ class App
             route: $route
         );
 
+        if (DEBUG) {
+            Info::instance()->add('route', str_replace(ROOTPATH, '', $route->routeFile));
+            Info::instance()->add('control', str_replace(ROOTPATH, '', $route->controlFile));
+            Info::instance()->add('route params', $route->params);
+        }
+
         // Run the middleware
         $request = $this->request;
         $response = Response::createFromRequest($request);
@@ -68,7 +73,7 @@ class App
                 ->process($request, $response, $action);
 
         $response->withBody($html);
-        $response->withBody($this->replacePerformanceMarkers($response->body()));
+        $response->withBody($response->body());
 
         return $response->send();
     }
@@ -116,24 +121,6 @@ class App
         $this->request = $request;
 
         return $this;
-    }
-
-    private function replacePerformanceMarkers(string $output): string
-    {
-        if (! defined('START_TIME')) {
-            return $output;
-        }
-
-        // Execution time
-        $elapsed = microtime(true) - START_TIME;
-        $output = str_replace('{elapsed_time}', Numbers::humanTime($elapsed), $output);
-
-        // Memory usage
-        $peakMemory = Numbers::humanSize(memory_get_peak_usage());
-        $currentMemory = Numbers::humanSize(memory_get_usage());
-        $output = str_replace('{memory_usage}', "{$currentMemory}/{$peakMemory}", $output);
-
-        return $output;
     }
 
     private function setupSession()

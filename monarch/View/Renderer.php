@@ -75,4 +75,11 @@ class Renderer
 
         return $this;
     }
+
+    public function renderError()
+    {
+        $renderer = new HTMLRenderer();
+
+        return $renderer->render('+error');
+    }
 }

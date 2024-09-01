@@ -10,7 +10,7 @@
 
     <link href="/css/vendor/bootstrap-5.3.min.css" rel="stylesheet">
     <?= viewMeta()->output('styles') ?>
-    <script src="/js/vendor/htmx-2.0.0.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous"></script>
     <?= viewMeta()->output('scripts') ?>
     <?= viewMeta()->output('rawScripts') ?>
 </head>
@@ -19,16 +19,16 @@
     <div class="main">
         <x-navbar>
             <ul class="nav">
-                <li class="nav-item">
+                <li class="nav-item" hx-boost="true">
                     <a class="nav-link" href="/">Welcome</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" hx-boost="true">
                     <a class="nav-link" href="/about">About</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" hx-boost="true">
                     <a class="nav-link" href="/markdown">Markdown</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" hx-boost="true">
                     <a class="nav-link" href="/api">API</a>
                 </li>
                 <li class="nav-item">
@@ -48,7 +48,7 @@
             </div>
             <p class="text-center pt-2">Monarch is an experiment by <a href="https://github.com/lonnieezell" target="_blank">Lonnie Ezell</a></p>
             <p class="text-center pt-2 pb-5 opacity-50">
-                Crafted by a kaleidoscope of digital butterflies in <strong>{elapsed_time}</strong> using <strong>{memory_usage}</strong> of memory.
+                Crafted by a kaleidoscope of digital butterflies.
             </p>
         </footer>
     </div>

@@ -69,5 +69,7 @@ nav:
         - Migrations: database/migrations.md
         - Extending: database/extending.md
     - Helpers:
+        - Arrays: helpers/arr.md
         - Files: helpers/files.md
         - Strings: helpers/str.md
+        - Debug Tools: helpers/debugging.md

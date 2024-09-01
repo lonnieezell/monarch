@@ -8,7 +8,6 @@ use Monarch\Components\HasComponents;
 use Monarch\HTTP\Request;
 use Monarch\View\HasLayouts;
 use Monarch\View\RendererInterface;
-use Tracy\Debugger;
 
 class HTMLRenderer implements RendererInterface
 {

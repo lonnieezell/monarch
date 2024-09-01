@@ -50,9 +50,21 @@ class Request
         unset($uriParts);
 
         $request->body = file_get_contents('php://input');
-        $request->headers = function_exists('getallheaders')
-            ? \getallheaders()
-            : [];
+
+        // Headers
+        $headers = [
+            'Content-Type' => new Header('Content-Type', $_SERVER['CONTENT_TYPE'] ?? 'text/html'),
+        ];
+        foreach (array_keys($_SERVER) as $key) {
+            if (sscanf($key, 'HTTP_%s', $header) === 1) {
+                // take SOME_HEADER and turn it into Some-Header
+                $header = str_replace('_', ' ', strtolower($header));
+                $header = str_replace(' ', '-', ucwords($header));
+
+                $headers[$header] = new Header($header, $_SERVER[$key]);
+            }
+        }
+        $request->headers = $headers;
 
         self::$instance = $request;
 

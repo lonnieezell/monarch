@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Monarch\Debug;
 
 use Monarch\HTTP\Request;
+use Monarch\View\Renderer;
 use Throwable;
 
 /**
@@ -12,14 +13,12 @@ use Throwable;
  */
 class Net
 {
-    private \Throwable $exception;
+    private ?Throwable $exception = null;
 
-    public function register(bool $enable=false)
+    public function register()
     {
-        if ($enable) {
-            set_exception_handler([$this, 'handleException']);
-            set_error_handler([$this, 'handleError']);
-        }
+        set_exception_handler([$this, 'handleException']);
+        set_error_handler([$this, 'handleError']);
     }
 
     public function handleException(Throwable $e)
@@ -42,7 +41,13 @@ class Net
 
         $headers = Request::instance()->headers();
 
-        include __DIR__ . '/resources/errors.php';
+        if (env('DEBUG')) {
+            include __DIR__ . '/resources/errors.php';
+        } else {
+            // Render the error page based on the routes
+            Renderer::createWithRequest(Request::instance())
+                ->render('+error.php');
+        }
     }
 
     public function highlightFile(string $file, int $lineNumber, int $lines = 15): string

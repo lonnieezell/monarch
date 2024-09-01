@@ -2,6 +2,22 @@
 
 Monarch provides a few tools to help you debug your application. As web developers the browser is our playground. The debugging tools take this to heart. Many of them are designed to be used in the browser's console.
 
+## Monarch Info Panel
+
+Instead of using a traditional debug bar in the browser window, Monarch uses the browser's `console` window to display debugging information. This is done to keep the browser window clean and to avoid interfering with the layout of the page. The Monarch info panel is displayed in the console window when an HTML page or fragment is loaded.
+
+It displays some basic stats including elapsed time for Monarch to build the page, the peak memory used, whether it's an HTMX request, and route information. It also displays information gleaned from HTMX's request headers, as well as a list of all headers found for the Request, in case that is different than what HTMX sends.
+
+### Adding Custom Info
+
+You can add custom information to the `Basic Stats` section of the info panel by using the `Monarch\Debug\Info` class.
+
+```php
+use Monarch\Debug\Info;
+
+Info::instance()->add('Custom Label', 'Custom Value');
+```
+
 ## Console Logging
 
 The `debug()` helper function provides a wrapper around many of Javascript's `console` logging functions. The methods are used within the PHP files, but the logs are displayed in the browser's console. The display has custom styling to make it instantly recognizable as a Monarch log.

@@ -22,6 +22,6 @@ if (! defined('DEBUG')) {
     define('DEBUG', (bool)getenv('DEBUG'));
 }
 
-(new Net())->register(DEBUG);
+(new Net())->register();
 
 echo $app->run();
