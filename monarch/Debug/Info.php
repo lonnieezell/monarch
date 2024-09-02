@@ -69,11 +69,13 @@ class Info
     public function displayHtmxStats(): string
     {
         $stats = [
+            'current url' => Request::instance()->currentHtmxUrl(),
             'is boosted' => Request::instance()->isBoosted(),
             'is prompt' => Request::instance()->prompt(),
             'target' => Request::instance()->target(),
             'trigger id' => Request::instance()->triggerId(),
             'trigger name' => Request::instance()->triggerName(),
+            'is history restoration' => Request::instance()->isHistoryRestoration(),
         ];
 
         return $this->renderSection(group: 'Monarch: HTMX', data: $stats);

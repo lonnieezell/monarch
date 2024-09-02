@@ -163,7 +163,7 @@ class Request
      */
     public function header(string $name): string|null
     {
-        return $this->headers[$name] ?? null;
+        return $this->headers[$name]?->value ?? null;
     }
 
     /**
@@ -180,7 +180,24 @@ class Request
      */
     public function isHtmx(): bool
     {
-        return $this->header('HX-Request') === 'true';
+        return $this->header('Hx-Request') === 'true';
+    }
+
+    /**
+     * Returns the current htmx request URL.
+     */
+    public function currentHtmxUrl(): string|null
+    {
+        return $this->header('Hx-Current-Url');
+    }
+
+    /**
+     * Returns a boolean value indicating whether the request
+     * is for history restoration after a miss in the local history cache
+     */
+    public function isHistoryRestoration(): bool
+    {
+        return $this->header('Hx-History-Restore-Request') === 'true';
     }
 
     /**
@@ -189,7 +206,7 @@ class Request
      */
     public function isBoosted(): bool
     {
-        return $this->header('HX-Boosted') === 'true';
+        return $this->header('Hx-Boosted') === 'true';
     }
 
     /**
@@ -198,7 +215,7 @@ class Request
      */
     public function prompt(): string|null
     {
-        return $this->header('HX-Prompt');
+        return $this->header('Hx-Prompt');
     }
 
     /**
@@ -206,7 +223,7 @@ class Request
      */
     public function target(): string|null
     {
-        return $this->header('HX-Target');
+        return $this->header('Hx-Target');
     }
 
     /**
@@ -214,7 +231,7 @@ class Request
      */
     public function triggerId(): string|null
     {
-        return $this->header('HX-Trigger');
+        return $this->header('Hx-Trigger');
     }
 
     /**
@@ -222,6 +239,6 @@ class Request
      */
     public function triggerName(): string|null
     {
-        return $this->header('HX-Trigger-Name');
+        return $this->header('Hx-Trigger-Name');
     }
 }
