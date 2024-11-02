@@ -13,8 +13,18 @@ All components should be located within the `app/Components` directory. This dir
 ```php
 return [
     'componentPaths' => [
-        'app/Components',
-        'app/CustomComponents',
+        'x' => 'app/Components',
+        'x' => 'app/CustomComponents',
+    ],
+];
+```
+
+Each component's tag in the HTML will have a prefix of `x-` to differentiate it from standard HTML tags. This is a convention that Monarch uses to make it clear that a tag is a custom component. You can change the prefix by updating the key of the `componentPaths` array in the `config/app.php` file.
+
+```php
+return [
+    'componentPaths' => [
+        'my' => 'app/Components',
     ],
 ];
 ```
@@ -38,6 +48,14 @@ Once this file is created, you can use the component in your views like this:
 ```
 
 The `slot` tag is a placeholder that will be replaced with the content inside the component tag.
+
+#### Nested Component Folders
+
+You can create nested folders within the `app/Components` directory to organize your components. For example, if you wanted to create a `form` component, you could create a folder named `form` and place the component file inside it. The name of the component would replace the directory separator with a period (.). So `form/fieldset` would be named `x-form.fieldset`. The component would then be used like this:
+
+```html
+<x-form.fieldset></x-form.fieldset>
+```
 
 ### Attributes
 
@@ -105,9 +123,9 @@ Since the component file is just a PHP file, you can use PHP to generate dynamic
 // app/components/button.php
 <?php
     if ($attributes->has('disabled')) {
-        $class('btn btn-primary btn-disabled');
+        $class = 'btn btn-primary btn-disabled';
     } else {
-        $class('btn btn-primary');
+        $class = 'btn btn-primary';
     }
 ?>
 

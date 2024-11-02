@@ -54,7 +54,7 @@ class ComponentManager
             throw new Exception('No component directories have been set.');
         }
 
-        foreach ($this->componentDirectories as $directory) {
+        foreach ($this->componentDirectories as $prefix => $directory) {
             foreach (Files::in($directory) as $file) {
                 $componentName = str_replace($directory . DIRECTORY_SEPARATOR, '', $file->getPathname());
                 $componentName = str_replace('.php', '', $componentName);
@@ -65,7 +65,11 @@ class ComponentManager
                     continue;
                 }
 
-                $this->components[$componentName] = $file->getPathname();
+                if (! isset($this->components[$prefix])) {
+                    $this->components[$prefix] = [];
+                }
+
+                $this->components[$prefix][$componentName] = $file->getPathname();
             }
         }
 
@@ -73,17 +77,27 @@ class ComponentManager
     }
 
     /**
+     * Returns the prefixes for the registered components.
+     * i.e. 'x' and 'm' by default.
+     */
+    public function prefixes(): array
+    {
+        return array_keys($this->components);
+    }
+
+    /**
      * Renders out a single component.
      *
+     * - $prefix is the prefix for the component (e.g. 'x' or 'm').
      * - $tagName is the name of the component to render.
      * - $rawAttributes is an array of attributes to pass to the component.
      * - $content is the content to pass to the component to be slotted in.
      *
      * @throws Exception
      */
-    public function render(string $tagName, array $rawAttributes = [], string $content = '')
+    public function render(string $prefix, string $tagName, array $rawAttributes = [], string $content = '')
     {
-        if (!isset($this->components[$tagName])) {
+        if (!isset($this->components[$prefix][$tagName])) {
             throw new Exception("Component $tagName not registered.");
         }
 
@@ -91,7 +105,7 @@ class ComponentManager
         $attributes = new Attributes($rawAttributes);
 
         // Check for a control file for this component
-        $controlFile = $this->components[$tagName] . '.control';
+        $controlFile = $this->components[$prefix][$tagName] . '.control';
         $control = file_exists($controlFile) ? include $controlFile : null;
 
         if (!is_null($control) && (!is_object($control) || !$class instanceof Component)) {
@@ -105,7 +119,7 @@ class ComponentManager
 
         // Otherwise, render the component view directly
         ob_start();
-        include $this->components[$tagName];
+        include $this->components[$prefix][$tagName];
         $component = ob_get_clean();
 
         return $this->parseSlots($component, $content);

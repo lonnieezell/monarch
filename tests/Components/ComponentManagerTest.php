@@ -5,7 +5,10 @@ use Monarch\Helpers\Reflection;
 
 beforeEach(function () {
     $this->componentManager = ComponentManager::instance()
-        ->forComponentDirectories(TESTPATH . '_support/components');
+        ->forComponentDirectories([
+            'x' => TESTPATH . '_support/components/base',
+            'm' => TESTPATH . '_support/components/mail',
+        ]);
     $this->componentManager->discover();
 });
 
@@ -22,7 +25,7 @@ describe('ComponentManager', function () {
         $tagName = 'simple-button';
         $content = 'Click Me!';
 
-        $result = $this->componentManager->render($tagName, [], $content);
+        $result = $this->componentManager->render('x', $tagName, [], $content);
 
         $expected = '<button type="button" class="btn btn-primary">
     Click Me!
@@ -38,7 +41,7 @@ describe('ComponentManager', function () {
         $attributes = ['class' => 'btn-sm'];
         $content = 'Click Me!';
 
-        $result = $this->componentManager->render($tagName, $attributes, $content);
+        $result = $this->componentManager->render('x', $tagName, $attributes, $content);
 
         $expected = '<button type="button" class="btn btn-primary btn-sm">
     Click Me!
@@ -54,7 +57,7 @@ describe('ComponentManager', function () {
         $attributes = ['id' => 'foo', 'class' => 'btn-sm'];
         $content = 'Click Me!';
 
-        $result = $this->componentManager->render($tagName, $attributes, $content);
+        $result = $this->componentManager->render('x', $tagName, $attributes, $content);
 
         $expected = '<button type="button" id="foo" class="btn btn-primary btn-sm">
     Click Me!
@@ -69,7 +72,7 @@ describe('ComponentManager', function () {
         $tagName = 'nested.button';
         $content = 'Click Me!';
 
-        $result = $this->componentManager->render($tagName, [], $content);
+        $result = $this->componentManager->render('x', $tagName, [], $content);
 
         $expected = '<button type="button" class="btn btn-primary">
     Click Me!
@@ -99,7 +102,7 @@ describe('ComponentManager', function () {
 </button>
 ';
 
-        $result = $this->componentManager->render($tagName, $attributes, $content);
+        $result = $this->componentManager->render('x', $tagName, $attributes, $content);
 
         expect($result)->toBeString();
         expect($result)->toBe($expected);
@@ -109,7 +112,7 @@ describe('ComponentManager', function () {
         $tagName = 'unknown-component';
 
         expect(function () use ($tagName) {
-            $this->componentManager->render($tagName);
+            $this->componentManager->render('x', $tagName);
         })->toThrow(Exception::class, "Component $tagName not registered.");
     });
 

@@ -47,7 +47,9 @@ class TagParser
     public function parse(string $html): string
     {
         // TODO: Compare with using a DOM parser
-        $pattern = '/<x-(\w+)([^>]*)>(.*?)<\/x-\1>/s';
+        $prefixes = $this->componentManager->prefixes();
+        $pattern = '/<(' . implode('|', $prefixes) . ')-([\w.-]+)([^>]*)>(.*?)<\/\1-\2>/s';
+
         return preg_replace_callback($pattern, [$this, 'replaceTag'], $html);
     }
 
@@ -56,13 +58,14 @@ class TagParser
      */
     private function replaceTag($matches): string
     {
-        $tagName = $matches[1];
-        $attributesString = $matches[2];
-        $content = $matches[3];
+        $prefix = $matches[1];
+        $tagName = $matches[2];
+        $attributesString = $matches[3];
+        $content = $matches[4];
 
         $attributes = $this->parseAttributes($attributesString);
 
-        $html = $this->componentManager->render($tagName, $attributes, $content);
+        $html = $this->componentManager->render($prefix, $tagName, $attributes, $content);
         return $html;
     }
 

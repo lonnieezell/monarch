@@ -7,12 +7,16 @@ return [
     |--------------------------------------------------------------------------
     |
     | The paths to search for components in. These paths are relative to the
-    | root of the application.
+    | root of the application. The 'key' is the prefix for the tag name.
     |
-    | Default: ['app/Components']
+    | Default: [
+    |   'x' => 'app/Components',
+    |   'm' => 'monarch/Mail/components',
+    | ]
     */
     'componentPaths' => [
-        'app/Components',
+        'x' => 'app/Components',
+        'm' => 'monarch/Mail/components',
     ],
 
     /*

@@ -9,8 +9,11 @@ trait HasComponents
      */
     private function parseComponents(string $html): string
     {
+        $paths = config('app.componentPaths', []);
+        $paths = array_map(fn ($path) => ROOTPATH . $path, $paths);
+
         $components = ComponentManager::instance()
-            ->forComponentDirectories(ROOTPATH . 'app/components');
+            ->forComponentDirectories($paths);
         $components->discover();
 
         return TagParser::instance($components)
