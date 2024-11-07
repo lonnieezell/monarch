@@ -91,6 +91,19 @@ if (! function_exists('debug')) {
 }
 
 /**
+ * Dump and die
+ * Uses Kint's d() function to dump variables and then die.
+ */
+if (! function_exists('dd')) {
+    function dd(...$args)
+    {
+        d(...$args);
+
+        die();
+    }
+}
+
+/**
  * Get a value from the environment, or return the default value.
  *
  * @param string      $key

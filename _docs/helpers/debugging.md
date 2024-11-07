@@ -62,3 +62,12 @@ debug()->groupEnd();
 ### Configuring Logging
 
 By default, the log items are echoed out at the location that you call the `debug()` function. You can change this behavior by setting the `capture` option to `true` in the `debug` config file. This will display all of the logs at the end of the page, just prior to the closing `</body>` tag. The advantage here is that the script tags that do the logging do not clutter up the HTML source. This does come at a cost of not seeing what line in the generated HTML the log was called from.
+
+## Local Debugging
+
+In addition to logging to the browser console, you can also view more information using [Kint's](https://kint-php.github.io/kint/) `d()` function or `dd()`. This will display a more detailed view of the data in the browser window. This is useful for debugging complex data structures.
+
+```php
+d($data);
+dd($data);
+```
