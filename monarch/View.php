@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Monarch;
 
+use Monarch\Concerns\IsSingleton;
 use RuntimeException;
 
 /**
@@ -15,6 +16,8 @@ use RuntimeException;
  */
 class View
 {
+    use IsSingleton;
+
     /**
      * The name of the layout to use
      *
@@ -35,15 +38,26 @@ class View
      */
     protected $currentSlot;
 
-    public static $instance;
+    /**
+     * The base path to look for views in.
+     * This is the 'routes' folder by default.
+     *
+     * @var string
+     */
+    protected string $basePath;
 
-    public static function factory()
+    public static function factory(?string $basePath=null)
     {
         if (self::$instance === null) {
-            self::$instance = new self();
+            self::$instance = new self($basePath);
         }
 
         return self::$instance;
+    }
+
+    public function __construct(?string $basePath)
+    {
+        $this->basePath = $basePath ?? ROOTPATH .'routes';
     }
 
     /**
@@ -55,10 +69,10 @@ class View
      */
     public function display(string $file, ?array $data): string
     {
-        $path = ROOTPATH."routes/{$file}.php";
+        $path = "{$this->basePath}/{$file}.php";
 
         if (! file_exists($path)) {
-            throw new RuntimeException("View not found: {$path}");
+            throw new RuntimeException("File not found: {$path}");
         }
 
         if (is_array($data)) {
@@ -117,7 +131,6 @@ class View
     /**
      * Creates a placeholder slot within a template files
      * that can have content defined in a different view.
-     *
      *
      * @return string
      */

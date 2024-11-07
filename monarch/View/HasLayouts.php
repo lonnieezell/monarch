@@ -88,7 +88,7 @@ trait HasLayouts
         }
 
         // Make data available to the view
-        if (is_array($this->data)) {
+        if (isset($this->data) && is_array($this->data)) {
             $data = $this->data;
         }
 

@@ -75,15 +75,14 @@ would define a `get()` method. To handle a `POST` request, you would define a `p
 
 return new class()
 {
-    public function get(): string|array|void
+    public function get(): string
     {
-        echo 'Hello, World!';
+        return 'Hello, World!';
     }
 }
 ```
 
-If the method returns a string, it will be made available to the route file as the `$content` variable. If it returns any other data type,
-it will be provided to the route file as the `$data` variable.
+If the method returns a string, it will be made available to the route file as the `$content` variable. If it returns any other data type, it will be provided to the route file as the `$data` variable.
 
 If you need to provide both the `$content` and `$data` variables, you can return an array with the `content` and `data` keys.
 
@@ -329,3 +328,7 @@ public function get()
     }
 }
 ```
+
+### Monarch Routes
+
+When the `DEBUG` constant is set to `true`, Monarch provides a set of routes to provide tools for you to use. These all use the `_/` folder to avoid conflicts with your own routes. You should not use a base folder in your routes folder called `_` otherwise that will override the Monarch routes.

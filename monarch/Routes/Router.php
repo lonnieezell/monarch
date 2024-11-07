@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Monarch\Routes;
 
-use Monarch\Config;
 use Monarch\HTTP\Request;
 use Monarch\View\Renderer;
 use RuntimeException;
@@ -16,7 +15,7 @@ use SplFixedArray;
  */
 class Router
 {
-    public readonly string $basePath;
+    public readonly array $basePath;
     public readonly string $routeFile;
     public readonly string $controlFile;
     public readonly ?SplFixedArray $routeParams;
@@ -46,7 +45,16 @@ class Router
      */
     public function setBasePath(string $path): static
     {
-        $this->basePath = rtrim($path, '/ ') . '/';
+        $paths = [
+            rtrim($path, '/ ') . '/',
+        ];
+
+        // Enable Monarch routes in debug mode.
+        if (DEBUG) {
+            $paths[] = MONARCHPATH;
+        }
+
+        $this->basePath = $paths;
 
         return $this;
     }
@@ -69,12 +77,13 @@ class Router
         $controlFile = '';
 
         // Do we have a direct match?
-        [$routeFile, $controlFile] = $this->searchForFiles($this->basePath . $path .'.*');
+        [$routeFile, $controlFile] = $this->searchForFiles($path .'.*');
 
         // Handle when directory name matches route and has an index file.
-        if ($routeFile === '' && is_dir($this->basePath . $path)) {
-            // $patterns[] = $this->basePath . $path .'/index.*';
-            [$routeFile, $controlFile] = $this->searchForFiles($this->basePath . $path .'/index.*');
+        foreach ($this->basePath as $basePath) {
+            if ($routeFile === '' && is_dir($basePath . $path)) {
+                [$routeFile, $controlFile] = $this->searchForFiles($path .'/index.*');
+            }
         }
 
         $hasPlaceholders = strpos($path, '[') !== false;
@@ -91,7 +100,7 @@ class Router
                     return $carry .'\[*\]';
                 });
 
-                [$routeFile, $controlFile] = $this->searchForFiles($this->basePath . ltrim($searchPath, DIRECTORY_SEPARATOR) . '.*');
+                [$routeFile, $controlFile] = $this->searchForFiles(ltrim($searchPath, DIRECTORY_SEPARATOR) . '.*');
 
                 if ($routeFile !== '') {
                     break;
@@ -151,20 +160,27 @@ class Router
     {
         $routeFile = '';
         $controlFile = '';
-        $result = glob($pattern);
 
-        if ($result === false) {
-            throw new RuntimeException('Error scanning for route files.');
+        foreach($this->basePath as $basePath) {
+            $result = glob($basePath . $pattern);
+
+            if ($result === false) {
+                continue;
+            }
+
+            if (is_array($result) && count($result) > 0) {
+                $routeFile = $result[0];
+
+                // If 2 matches, then the control file is the first one
+                if (count($result) === 2) {
+                    $controlFile = $result[0];
+                    $routeFile = $result[1];
+                }
+            }
         }
 
-        if (is_array($result) && count($result) > 0) {
-            $routeFile = $result[0];
-
-            // If 2 matches, then the control file is the first one
-            if (count($result) === 2) {
-                $controlFile = $result[0];
-                $routeFile = $result[1];
-            }
+        if ($result === false && $routeFile === '') {
+            throw new RuntimeException('Error scanning for route files.');
         }
 
         return [$routeFile, $controlFile];

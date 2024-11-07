@@ -74,7 +74,7 @@ describe('ComponentManager', function () {
 
         $result = $this->componentManager->render('x', $tagName, [], $content);
 
-        $expected = '<button type="button" class="btn btn-primary">
+        $expected = '<button type="button" class="nested btn btn-primary">
     Click Me!
 </button>
 ';

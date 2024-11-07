@@ -13,6 +13,7 @@
     "require": {
         "php": ">=8.2",
         "laminas/laminas-escaper": "^2.13",
+        "laminas/laminas-mail": "^2.4",
         "league/commonmark": "^2.4",
         "phpoption/phpoption": "^1.9",
         "somnambulist/validation": "^1.12",
