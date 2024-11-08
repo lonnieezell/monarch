@@ -7,7 +7,6 @@ namespace Monarch\Routes;
 use Monarch\HTTP\Request;
 use Monarch\View\Renderer;
 use RuntimeException;
-use SplFixedArray;
 
 /**
  * Given a URL and a base folder, this class will attempt to determine the
@@ -18,7 +17,7 @@ class Router
     public readonly array $basePath;
     public readonly string $routeFile;
     public readonly string $controlFile;
-    public readonly ?SplFixedArray $routeParams;
+    public readonly ?array $routeParams;
 
     /**
      * Creates a new Router instance with a base path set.
@@ -86,8 +85,8 @@ class Router
             }
         }
 
-        $hasPlaceholders = strpos($path, '[') !== false;
-        if ($routeFile === '' && $hasPlaceholders) {
+        // Handle dynamic routes (i.e. /posts[year][month].php and posts[year][month].control.php)
+        if ($routeFile === '') {
             $segments = explode('/', $path);
             $pathRoute = '';
 
@@ -214,6 +213,6 @@ class Router
             }
         }
 
-        return count($params) === 0 ? null : SplFixedArray::fromArray($params);
+        return count($params) === 0 ? null : $params;
     }
 }

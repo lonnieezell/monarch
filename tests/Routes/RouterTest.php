@@ -7,7 +7,12 @@ describe('router', function () {
     test('can set base path', function () {
         $router = Router::createWithBasePath(TESTPATH .'_support/routes');
 
-        expect($router->basePath)->toBe(TESTPATH .'_support/routes/');
+        $expected = [
+            TESTPATH .'_support/routes/',
+            ROOTPATH .'monarch/'
+        ];
+
+        expect($router->basePath)->toBe($expected);
     });
 
     test('can get files for request', function () {

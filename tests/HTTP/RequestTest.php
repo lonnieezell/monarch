@@ -19,7 +19,9 @@ describe('create from globals', function () {
         expect($request->port)->toEqual(80);
         expect($request->path)->toEqual('foo/bar');
         expect($request->body)->toEqual('');
-        expect($request->headers)->toEqual([]);
+        expect($request->headers)->toEqual([
+            'Content-Type' => 'text/html',
+        ]);
     });
 });
 
@@ -121,17 +123,15 @@ describe('has header', function () {
     });
 });
 
-describe('header', function () {
-    test('returns header value', function () {
-        $request = Request::createFromArray([
-            'headers' => [
-                'Content-Type' => 'application/json',
-            ]
-        ]);
+test('returns header value', function () {
+    $request = Request::createFromArray([
+        'headers' => [
+            'Content-Type' => 'application/json',
+        ]
+    ]);
 
-        expect($request->header('Content-Type'))->toEqual('application/json');
-        expect($request->header('Authorization'))->toBeNull();
-    });
+    expect($request->header('Content-Type'))->toEqual('application/json');
+    expect($request->header('Authorization'))->toBeNull();
 });
 
 describe('is htmx request', function () {

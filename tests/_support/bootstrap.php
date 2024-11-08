@@ -4,11 +4,15 @@
 
 use Monarch\DotEnv;
 
+define('DEBUG', true);
+
 define('START_TIME', microtime(true));
 define('ENVIRONMENT', 'test');
 define('ROOTPATH', realpath(__DIR__ .'/../../') .'/');
 define('APPPATH', realpath(ROOTPATH.'app') .'/');
 define('TESTPATH', realpath(ROOTPATH.'tests') .'/');
+define('MONARCHPATH', realpath(ROOTPATH.'monarch') .'/');
+define('WRITEPATH', realpath(ROOTPATH.'writable') .'/');
 
 // Load .env file
 (new DotEnv(ROOTPATH .'/.env'))->load();

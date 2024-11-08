@@ -53,7 +53,7 @@ class Request
 
         // Headers
         $headers = [
-            'Content-Type' => new Header('Content-Type', $_SERVER['CONTENT_TYPE'] ?? 'text/html'),
+            'Content-Type' => $_SERVER['CONTENT_TYPE'] ?? 'text/html',
         ];
         foreach (array_keys($_SERVER) as $key) {
             if (sscanf($key, 'HTTP_%s', $header) === 1) {
@@ -61,7 +61,7 @@ class Request
                 $header = str_replace('_', ' ', strtolower($header));
                 $header = str_replace(' ', '-', ucwords($header));
 
-                $headers[$header] = new Header($header, $_SERVER[$key]);
+                $headers[$header] = $_SERVER[$key];
             }
         }
         $request->headers = $headers;
@@ -163,7 +163,7 @@ class Request
      */
     public function header(string $name): string|null
     {
-        return $this->headers[$name]?->value ?? null;
+        return $this->headers[$name] ?? null;
     }
 
     /**
@@ -180,7 +180,7 @@ class Request
      */
     public function isHtmx(): bool
     {
-        return $this->header('Hx-Request') === 'true';
+        return $this->header('HX-Request') === 'true';
     }
 
     /**
@@ -188,7 +188,7 @@ class Request
      */
     public function currentHtmxUrl(): string|null
     {
-        return $this->header('Hx-Current-Url');
+        return $this->header('HX-Current-Url');
     }
 
     /**
@@ -197,7 +197,7 @@ class Request
      */
     public function isHistoryRestoration(): bool
     {
-        return $this->header('Hx-History-Restore-Request') === 'true';
+        return $this->header('HX-History-Restore-Request') === 'true';
     }
 
     /**
@@ -206,7 +206,7 @@ class Request
      */
     public function isBoosted(): bool
     {
-        return $this->header('Hx-Boosted') === 'true';
+        return $this->header('HX-Boosted') === 'true';
     }
 
     /**
@@ -215,7 +215,7 @@ class Request
      */
     public function prompt(): string|null
     {
-        return $this->header('Hx-Prompt');
+        return $this->header('HX-Prompt');
     }
 
     /**
@@ -223,7 +223,7 @@ class Request
      */
     public function target(): string|null
     {
-        return $this->header('Hx-Target');
+        return $this->header('HX-Target');
     }
 
     /**
@@ -231,7 +231,7 @@ class Request
      */
     public function triggerId(): string|null
     {
-        return $this->header('Hx-Trigger');
+        return $this->header('HX-Trigger');
     }
 
     /**
@@ -239,6 +239,6 @@ class Request
      */
     public function triggerName(): string|null
     {
-        return $this->header('Hx-Trigger-Name');
+        return $this->header('HX-Trigger-Name');
     }
 }
