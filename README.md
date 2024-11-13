@@ -31,9 +31,30 @@ I believe building the web can be fun.
 -   ???? Got ideas? Let me know.
 -
 
+## Installation
+
+You can install Monarch via Composer:
+
+```bash
+composer create-project monarchphp/monarch my-project
+```
+
+## Development Server
+
+Monarch comes with a built-in development server. You can start it by running:
+
+```bash
+php ./serve.php
+
+# Will output something like:
+ Serving on port 3000 with PHP 8.2.23
+ [Tue Nov 12 23:59:56 2024] PHP 8.2.23 Development Server (http://localhost:3000) started
+```
+
+
 ## Documentation
 
-Documentation can be found within the [\_docs](./_docs/index.md) directory.
+See the <a href="https://lonnieezell.github.io/monarch-framework/" target="_blank">documentation</a> for more details and usage guides.
 
 ## License
 

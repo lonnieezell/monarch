@@ -1,5 +1,5 @@
 {
-    "name": "lonnieezell/monarch",
+    "name": "monarchphp/monarch",
     "type": "project",
     "description": "A back-to-basics framework for the modern web.",
     "license": "MIT",
@@ -12,13 +12,7 @@
     ],
     "require": {
         "php": ">=8.2",
-        "kint-php/kint": "^5.1",
-        "laminas/laminas-escaper": "^2.13",
-        "laminas/laminas-mail": "^2.4",
-        "league/commonmark": "^2.4",
-        "phpoption/phpoption": "^1.9",
-        "somnambulist/validation": "^1.12",
-        "symfony/yaml": "^7.0"
+        "monarchphp/framework": "dev-develop"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.49",
@@ -32,7 +26,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Monarch\\": "monarch/",
+            "App\\": "app/",
             "Tests\\": "tests/",
             "Tests\\Support\\": "tests/_support/"
         }
@@ -59,7 +53,6 @@
         "rector": "rector process --config .config/rector.php --dry-run",
         "rector-fix": "rector process --config .config/rector.php",
         "style": "php-cs-fixer fix --config=.config/.php-cs-fixer.dist.php --dry-run",
-        "style-fix": "php-cs-fixer --config=.config/.php-cs-fixer.dist.php fix",
-        "docs": "mkdocs serve"
+        "style-fix": "php-cs-fixer --config=.config/.php-cs-fixer.dist.php fix"
     }
 }

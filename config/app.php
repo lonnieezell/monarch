@@ -16,7 +16,7 @@ return [
     */
     'componentPaths' => [
         'x' => 'app/Components',
-        'm' => 'monarch/Mail/components',
+        'm' => MONARCHPATH .'Mail/components',
     ],
 
     /*

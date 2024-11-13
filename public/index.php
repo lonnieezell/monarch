@@ -12,7 +12,7 @@ define('ENVIRONMENT', getenv('ENVIRONMENT') ?: 'development');
 define('ROOTPATH', realpath('..') .'/');
 define('APPPATH', realpath(ROOTPATH.'app') .'/');
 define('TESTPATH', realpath(ROOTPATH.'tests') .'/');
-define('MONARCHPATH', realpath(ROOTPATH.'monarch') .'/');
+define('MONARCHPATH', realpath(ROOTPATH.'vendor/monarchphp/framework/src') .'/');
 define('WRITEPATH', realpath(ROOTPATH.'writable') .'/');
 
 $app = App::createFromGlobals();
